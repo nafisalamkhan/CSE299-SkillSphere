@@ -1,5 +1,10 @@
-package com.cse299.skillSphere.auth;
+package com.cse299.skillSphere.services;
 
+import com.cse299.skillSphere.models.Role;
+import com.cse299.skillSphere.auth.UserRequest;
+import com.cse299.skillSphere.models.User;
+import com.cse299.skillSphere.repositories.RoleRepository;
+import com.cse299.skillSphere.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

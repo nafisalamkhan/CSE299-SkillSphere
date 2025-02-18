@@ -1,9 +1,9 @@
 package com.cse299.skillSphere.user;
 
-import com.cse299.skillSphere.auth.User;
-import com.cse299.skillSphere.auth.Role;
+import com.cse299.skillSphere.models.User;
+import com.cse299.skillSphere.models.Role;
 import com.cse299.skillSphere.auth.UserResponse;
-import com.cse299.skillSphere.auth.UserService;
+import com.cse299.skillSphere.services.UserService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

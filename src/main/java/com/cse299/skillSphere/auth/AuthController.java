@@ -1,5 +1,6 @@
 package com.cse299.skillSphere.auth;
 
+import com.cse299.skillSphere.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

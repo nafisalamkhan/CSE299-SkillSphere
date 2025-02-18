@@ -1,4 +1,4 @@
-package com.cse299.skillSphere.auth;
+package com.cse299.skillSphere.models;
 
 import jakarta.persistence.*;
 
