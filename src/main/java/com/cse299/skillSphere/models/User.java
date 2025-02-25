@@ -1,10 +1,15 @@
 package com.cse299.skillSphere.models;
 
+import com.cse299.skillSphere.messages.Status;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.HashSet;
 import java.util.Set;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "user")
 public class User {
@@ -24,6 +29,9 @@ public class User {
 
     @Column(name = "password")
     private String password;
+
+    @Column(name = "status")
+    private Status status;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -78,5 +86,9 @@ public class User {
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
+    }
+
+    //for one to one messaging
+    public void Status(Status status) {
     }
 }

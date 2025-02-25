@@ -1,5 +1,6 @@
 package com.cse299.skillSphere.repositories;
 
+import com.cse299.skillSphere.messages.Status;
 import com.cse299.skillSphere.models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -18,5 +19,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
             where ur.role_id in (:roles)
             """, nativeQuery = true)
     List<User> findAllByRolesIn(Set<Long> roles);
+
+
+    //for one to one messaging
+    List<User> findAllByStatus(Status status);
 }
 
