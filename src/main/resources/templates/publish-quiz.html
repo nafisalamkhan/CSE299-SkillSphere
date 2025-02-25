@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Publish Quiz</title>
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+            rel="stylesheet">
+    <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+            rel="stylesheet">
+    <style>
+        :root {
+    --primary-color: #900C3F;
+    --secondary-color: #900C3F;
+    --background-color: #f3f4f6;
+    --card-background: #ffffff;
+    --text-primary: #1f2937;
+    --text-secondary: #4b5563;
+    }
+
+        body {
+            background-color: var(--background-color);
+        }
+
+        .card-header {
+            background: var(--primary-color);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            padding: 12px;
+            border: 1px solid #dee2e6;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15);
+            border-color: var(--primary-color);
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            border: nonergb(192, 192, 192);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-color); transform : translateY( -2px);
+            transform: translateY(-2px);
+            box-shadow:  var(--primary-color);
+        }
+
+        .btn-secondary {
+            background: rgb(226, 223, 210);
+            border: none;
+            color: black;
+        }
+
+
+    </style>
+</head>
+<body>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card">
+                <div class="card-header text-center py-4">
+                    <h2 class="mb-0">
+                        <i class="fas fa-folder-plus me-2"></i> Publish New Quiz
+                    </h2>
+                </div>
+                <div class="card-body p-4">
+
+                    <form action="#" th:action="@{/admin-publish-quiz}"
+                          th:object="${quiz}" method="post">
+                        <div class="mb-4">
+                            <label for="name" class="form-label fw-bold">Category
+                                Name</label>
+
+                            <div class="input-group">
+                                <input type="text" id="name" th:field="*{name}"
+                                       class="form-control" placeholder="Enter category name"
+                                       required>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="name" class="form-label fw-bold">Quiz
+                                Topic</label>
+
+                            <div class="input-group">
+                                <input type="text" id="topic" th:field="*{topic}"
+                                       class="form-control" placeholder="Enter quiz topic"
+                                       required>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="name" class="form-label fw-bold">Quiz Link</label>
+
+                            <div class="input-group">
+                                <input type="url" id="quizlink" th:field="*{quizlink}"
+                                       class="form-control" placeholder="Enter quiz link"
+                                       required>
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus-circle me-2"></i> Publish Quiz
+                            </button>
+                            <a href="/admin-index" class="btn btn-secondary"> <i
+                                    class="fas fa-arrow-left me-2"></i> Back to Quizzes
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
