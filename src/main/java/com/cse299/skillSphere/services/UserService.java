@@ -1,5 +1,12 @@
-package com.cse299.skillSphere.auth;
+package com.cse299.skillSphere.services;
 
+import com.cse299.skillSphere.messages.Status;
+import com.cse299.skillSphere.models.Role;
+import com.cse299.skillSphere.auth.UserRequest;
+import com.cse299.skillSphere.models.User;
+import com.cse299.skillSphere.repositories.RoleRepository;
+import com.cse299.skillSphere.repositories.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -10,9 +17,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 @Service
+@RequiredArgsConstructor
 public class UserService implements UserDetailsService {
     @Autowired
     private UserRepository userRepository;
@@ -53,5 +62,28 @@ public class UserService implements UserDetailsService {
 
     public User findByUsername(String username) {
         return userRepository.findByUsername(username).orElse(null);
+    }
+
+
+
+    //for one to one messaging
+    private final UserRepository repository;
+
+    public void saveUser(User user) {
+        user.Status(Status.ONLINE);
+        repository.save(user);
+    }
+
+    public void disconnect(User user){
+        var connectedUser = repository.findByUsername(user.getUsername())
+                .orElse(null);
+        if (connectedUser != null){
+            connectedUser.setStatus(Status.OFFLINE);
+            repository.save(connectedUser);
+        }
+    }
+
+    public List<User> findConnectedUsers(){
+        return  repository.findAllByStatus(Status.ONLINE);
     }
 }

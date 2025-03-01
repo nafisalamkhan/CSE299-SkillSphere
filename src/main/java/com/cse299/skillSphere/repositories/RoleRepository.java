@@ -1,5 +1,6 @@
-package com.cse299.skillSphere.auth;
+package com.cse299.skillSphere.repositories;
 
+import com.cse299.skillSphere.models.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
