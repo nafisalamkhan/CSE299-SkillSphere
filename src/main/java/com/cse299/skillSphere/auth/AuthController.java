@@ -24,14 +24,12 @@ public class AuthController {
                 Map.of("value", "ROLE_USER", "text", "User")));
         return "register";
     }
-
     @PostMapping("/register")
     public String registerUser(@ModelAttribute("user") @Valid UserRequest userRequest, Model model) {
         userService.registerUser(userRequest);
-        model.addAttribute("message", "Registration successful. Please wait for admin approval.");
+        model.addAttribute("message", "Registration successful.");
         return "login";
     }
-
     @GetMapping("/login")
     public String login(@RequestParam(required = false) String error, Model model) {
         model.addAttribute("error", error);
