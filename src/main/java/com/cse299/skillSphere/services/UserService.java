@@ -32,6 +32,11 @@ public class UserService implements UserDetailsService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    private final UserRepository repository;
+    public UserService(UserRepository repository) {
+        this.repository = repository;
+    }
+
     public User registerUser(UserRequest userRequest) {
         User user = new User();
         user.setName(userRequest.getName());
@@ -67,7 +72,7 @@ public class UserService implements UserDetailsService {
 
 
     //for one to one messaging
-    private final UserRepository repository;
+
 
     public void saveUser(User user) {
         user.Status(Status.ONLINE);
