@@ -32,10 +32,6 @@ public class UserService implements UserDetailsService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    private final UserRepository repository;
-    public UserService(UserRepository repository) {
-        this.repository = repository;
-    }
 
     public User registerUser(UserRequest userRequest) {
         User user = new User();
@@ -76,19 +72,19 @@ public class UserService implements UserDetailsService {
 
     public void saveUser(User user) {
         user.Status(Status.ONLINE);
-        repository.save(user);
+        userRepository.save(user);
     }
 
     public void disconnect(User user){
-        var connectedUser = repository.findByUsername(user.getUsername())
+        var connectedUser = userRepository.findByUsername(user.getUsername())
                 .orElse(null);
         if (connectedUser != null){
             connectedUser.setStatus(Status.OFFLINE);
-            repository.save(connectedUser);
+            userRepository.save(connectedUser);
         }
     }
 
     public List<User> findConnectedUsers(){
-        return  repository.findAllByStatus(Status.ONLINE);
+        return  userRepository.findAllByStatus(Status.ONLINE);
     }
 }
