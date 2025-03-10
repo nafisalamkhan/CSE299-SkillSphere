@@ -1,8 +1,8 @@
 package com.cse299.skillSphere.services;
 
+import com.cse299.skillSphere.auth.UserRequest;
 import com.cse299.skillSphere.messages.Status;
 import com.cse299.skillSphere.models.Role;
-import com.cse299.skillSphere.auth.UserRequest;
 import com.cse299.skillSphere.models.User;
 import com.cse299.skillSphere.repositories.RoleRepository;
 import com.cse299.skillSphere.repositories.UserRepository;
@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -32,6 +31,7 @@ public class UserService implements UserDetailsService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
 
     public User registerUser(UserRequest userRequest) {
         User user = new User();
@@ -66,25 +66,24 @@ public class UserService implements UserDetailsService {
     }
 
 
-
     //for one to one messaging
-    private final UserRepository repository;
+
 
     public void saveUser(User user) {
         user.Status(Status.ONLINE);
-        repository.save(user);
+        userRepository.save(user);
     }
 
     public void disconnect(User user) {
-        var connectedUser = repository.findByUsername(user.getUsername())
+        var connectedUser = userRepository.findByUsername(user.getUsername())
                 .orElse(null);
         if (connectedUser != null) {
             connectedUser.setStatus(Status.OFFLINE);
-            repository.save(connectedUser);
+            userRepository.save(connectedUser);
         }
     }
 
     public List<User> findConnectedUsers() {
-        return repository.findAllByStatus(Status.ONLINE);
+        return userRepository.findAllByStatus(Status.ONLINE);
     }
 }
