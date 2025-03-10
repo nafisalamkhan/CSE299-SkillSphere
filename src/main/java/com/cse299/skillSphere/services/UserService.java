@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -74,16 +75,16 @@ public class UserService implements UserDetailsService {
         repository.save(user);
     }
 
-    public void disconnect(User user){
+    public void disconnect(User user) {
         var connectedUser = repository.findByUsername(user.getUsername())
                 .orElse(null);
-        if (connectedUser != null){
+        if (connectedUser != null) {
             connectedUser.setStatus(Status.OFFLINE);
             repository.save(connectedUser);
         }
     }
 
-    public List<User> findConnectedUsers(){
-        return  repository.findAllByStatus(Status.ONLINE);
+    public List<User> findConnectedUsers() {
+        return repository.findAllByStatus(Status.ONLINE);
     }
 }

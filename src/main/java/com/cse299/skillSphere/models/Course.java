@@ -1,18 +1,11 @@
 package com.cse299.skillSphere.models;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "course")
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING)
-
 public class Course {
 
     @Id
@@ -36,6 +29,4 @@ public class Course {
     @ManyToOne
     @JoinColumn(name = "InstructorID")
     private User instructor;
-
-
 }

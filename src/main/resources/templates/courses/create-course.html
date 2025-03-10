@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Create Course</title>
+    <script>
+        function addSection() {
+            const sectionIndex = document.querySelectorAll(".section").length;
+            const sectionDiv = document.createElement("div");
+            sectionDiv.classList.add("section");
+
+            sectionDiv.innerHTML = `
+                <h3>Section</h3>
+                <label>Title:</label>
+                <input type="text" name="sections[${sectionIndex}].title" required/><br>
+
+                <label>Description:</label>
+                <textarea name="sections[${sectionIndex}].description" required></textarea><br>
+
+                <div class="videos"></div>
+                <button type="button" onclick="addVideo(${sectionIndex})">Add Video</button>
+                <hr>
+            `;
+            document.getElementById("sections").appendChild(sectionDiv);
+        }
+
+        function addVideo(sectionIndex) {
+            const videoIndex = document.querySelectorAll(`#sections .section:nth-child(${sectionIndex + 1}) .video`).length;
+            const videoDiv = document.createElement("div");
+            videoDiv.classList.add("video");
+
+            videoDiv.innerHTML = `
+                <h4>Video</h4>
+                <label>Title:</label>
+                <input type="text" name="sections[${sectionIndex}].videos[${videoIndex}].title" required/><br>
+
+                <label>Description:</label>
+                <textarea name="sections[${sectionIndex}].videos[${videoIndex}].description" required></textarea><br>
+
+                <label>Select Video File:</label>
+                <input type="file" name="sections[${sectionIndex}].videos[${videoIndex}].file" accept="video/*" required/><br>
+                <hr>
+            `;
+            document.querySelector(`#sections .section:nth-child(${sectionIndex + 1}) .videos`).appendChild(videoDiv);
+        }
+    </script>
+</head>
+<body>
+<h2>Create Course</h2>
+<form th:action="@{/courses/create}" th:object="${courseRequest}" method="post" enctype="multipart/form-data">
+    <label>Title:</label>
+    <input type="text" th:field="*{title}" required/><br>
+
+    <label>Course Date:</label>
+    <input type="text" th:field="*{courseDate}" required/><br>
+
+    <label>Category ID:</label>
+    <input type="number" th:field="*{categoryId}" required/><br>
+
+    <label>Instructor ID:</label>
+    <input type="number" th:field="*{instructorId}" required/><br>
+
+    <h3>Sections</h3>
+    <div id="sections"></div>
+
+    <button type="button" onclick="addSection()">Add Section</button>
+    <br>
+    <button type="submit">Create Course</button>
+</form>
+</body>
+</html>
