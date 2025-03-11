@@ -3,6 +3,9 @@ package com.cse299.skillSphere.models;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "course")
 @Data
@@ -29,4 +32,11 @@ public class Course {
     @ManyToOne
     @JoinColumn(name = "InstructorID")
     private User instructor;
+
+    @ManyToMany
+    @JoinTable(name = "course_students",
+            joinColumns = @JoinColumn(name = "CourseID"),
+            inverseJoinColumns = @JoinColumn(name = "StudentID")
+    )
+    private Set<User> students = new HashSet<>();
 }
