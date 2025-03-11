@@ -1,6 +1,7 @@
 package com.cse299.skillSphere.messages.OneToOne.Chat;
 
 
+import com.cse299.skillSphere.messages.MessageType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -35,4 +36,8 @@ public class ChatMessage {
 
     @Column(name = "timestamp")
     private Date timestamp;
+
+    // group discussion
+    @Column(name = "message_type")
+    private MessageType type;
 }

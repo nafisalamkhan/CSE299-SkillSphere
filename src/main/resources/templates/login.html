@@ -101,7 +101,7 @@
 <body>
 <div class="login-container" id="login">
     <h2>Login</h2>
-    <form th:action="@{/login}" method="post">
+    <form id="loginForm" th:action="@{/login}" method="post">
         <label for="username">Username</label>
         <input type="text" id="username" name="username" placeholder="Enter username" required/><br/>
 
@@ -122,5 +122,7 @@
         </div>
     </form>
 </div>
+
+<script src="/static/js/main.js"></script>
 </body>
 </html>
