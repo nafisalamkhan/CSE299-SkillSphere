@@ -1,9 +1,12 @@
 package com.cse299.skillSphere.messages.OneToOne.Chat;
 
+import ch.qos.logback.core.model.Model;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,5 +42,27 @@ public class ChatController {
             @PathVariable("recipientId") String recipientId
     ){
         return ResponseEntity.ok(chatMessageService.findChatMessages(senderId, recipientId));
+    }
+
+
+
+    // group messaging
+    @MessageMapping("/chat.sendMessage")
+    @SendTo("user/public")
+    public ChatMessage sendMessage(
+            @Payload ChatMessage chatMessage
+    ){
+        return chatMessage;
+    }
+
+    @MessageMapping("/chat.addUser")
+    @SendTo("user/public")
+    public ChatMessage addUser(
+            @Payload ChatMessage chatMessage,
+            SimpMessageHeaderAccessor headerAccessor
+    ){
+        // adding username in ws session
+        headerAccessor.getSessionAttributes().put("username", chatMessage.getSenderId());
+        return chatMessage;
     }
 }
