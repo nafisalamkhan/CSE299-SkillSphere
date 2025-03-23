@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -29,7 +28,7 @@ public class EnrollmentService {
             return "Only students can enroll!";
         }
 
-        Course course = courseRepository.findByName(courseName).orElse(null);
+        Course course = courseRepository.findByTitle(courseName).orElse(null);
         if (course == null) return "Course not found!";
 
         if (course.getStudents().contains(student)) {
@@ -51,7 +50,7 @@ public class EnrollmentService {
             throw new RuntimeException("Only instructors can view students!");
         }
 
-        Course course = courseRepository.findByName(courseName)
+        Course course = courseRepository.findByTitle(courseName)
                 .orElseThrow(() -> new RuntimeException("Course not found!"));
 
         return List.copyOf(course.getStudents()); //set to list of user
@@ -68,7 +67,7 @@ public class EnrollmentService {
             return "Only instructors can remove students!";
         }
 
-        Course course = courseRepository.findByName(courseName).orElse(null);
+        Course course = courseRepository.findByTitle(courseName).orElse(null);
         if (course == null) return "Course not found!";
 
         User student = userRepository.findByUsername(studentUsername).orElse(null);

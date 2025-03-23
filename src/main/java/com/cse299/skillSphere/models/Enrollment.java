@@ -7,10 +7,6 @@ import lombok.*;
 @Entity
 @Table(name = "enrollment")
 @Data
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class Enrollment {
 
     @Id
@@ -18,7 +14,7 @@ public class Enrollment {
     @Column(name = "EnrollmentID")
     private int enrollmentId;
 
-    @ManyToMany
+    @ManyToOne
     @JoinColumn(name = "StudentID")
     private User student;
 
