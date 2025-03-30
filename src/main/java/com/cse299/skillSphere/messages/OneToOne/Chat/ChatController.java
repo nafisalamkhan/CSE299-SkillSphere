@@ -1,7 +1,9 @@
 package com.cse299.skillSphere.messages.OneToOne.Chat;
 
 import ch.qos.logback.core.model.Model;
+import com.cse299.skillSphere.services.ChatbotService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -9,8 +11,7 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -65,4 +66,31 @@ public class ChatController {
         headerAccessor.getSessionAttributes().put("username", chatMessage.getSenderId());
         return chatMessage;
     }
+
+
+
+    //chatbot
+
+    @Autowired
+    private ChatbotService chatBotService;
+
+    @GetMapping("/chatbot")
+    public String showChat(Model model) {
+        @SuppressWarnings("unused")
+        List<String> questions = chatBotService.getAllQuestions();
+        // model.addAttribute("message", new String());
+        return "chat";
+    }
+    @ModelAttribute("questions")
+    public List<String> questions(){
+        List<String> questions = chatBotService.getAllQuestions();
+        return questions;
+    }
+    @PostMapping("/chatbot")
+    public String chat(@RequestParam("message") String message, Model model) {
+        String response = chatBotService.handleInput(message);
+        // model.addAttribute("response", response);
+        return "chat";
+    }
+
 }
