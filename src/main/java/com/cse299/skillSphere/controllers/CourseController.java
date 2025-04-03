@@ -3,14 +3,13 @@ package com.cse299.skillSphere.controllers;
 import com.cse299.skillSphere.dto.CourseRequest;
 import com.cse299.skillSphere.dto.CourseResponse;
 import com.cse299.skillSphere.models.Category;
+import com.cse299.skillSphere.services.CategoryService;
 import com.cse299.skillSphere.services.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -21,12 +20,15 @@ public class CourseController {
     @Autowired
     private CourseService courseService;
 
+    @Autowired
+    private CategoryService categoryService;
+
     @GetMapping({"/create", "/create/"})
     public String showCreateCourseForm(Model model) {
         model.addAttribute("courseRequest", new CourseRequest());
 
         // Add categories and instructors for dropdowns
-        List<Category> categories = courseService.getAllCategories();
+        List<Category> categories = categoryService.getAllCategories();
         model.addAttribute("categories", categories);
 
         return "/courses/create-course";
@@ -56,4 +58,41 @@ public class CourseController {
         return "/courses/courses";
     }
 
+
+    @GetMapping("/edit/{courseId}")
+    public String showEditCourseForm(@PathVariable Integer courseId, Model model) {
+        try {
+            // Get course details for editing
+            CourseRequest courseRequest = courseService.getCourseForEdit(courseId);
+            model.addAttribute("courseRequest", courseRequest);
+
+            // Add categories for dropdown
+            List<Category> categories = categoryService.getAllCategories();
+            model.addAttribute("categories", categories);
+
+            return "courses/edit-course";
+        } catch (Exception e) {
+            // Handle exceptions - course not found, etc.
+            return "redirect:/courses?error=Course not found";
+        }
+    }
+
+    /**
+     * Handle course update submission
+     */
+    @PostMapping("/update")
+    public String updateCourse(@ModelAttribute CourseRequest courseRequest,
+                               RedirectAttributes redirectAttributes) {
+        try {
+            // Update the course
+            courseService.updateCourse(courseRequest);
+            redirectAttributes.addFlashAttribute("success", "Course updated successfully!");
+            return "redirect:/courses";
+        } catch (Exception e) {
+            // Handle exceptions
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Failed to update course: " + e.getMessage());
+            return "redirect:/courses/edit/" + courseRequest.getCourseId();
+        }
+    }
 }

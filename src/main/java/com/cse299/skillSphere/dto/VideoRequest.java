@@ -5,6 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Data
 public class VideoRequest {
+    private Integer id;
     private String title;
     private String description;
     private MultipartFile file;

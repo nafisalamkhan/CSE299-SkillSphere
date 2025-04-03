@@ -6,6 +6,7 @@ import java.util.List;
 
 @Data
 public class SectionRequest {
+    private Integer id;
     private String title;
     private String description;
     private List<VideoRequest> videos;

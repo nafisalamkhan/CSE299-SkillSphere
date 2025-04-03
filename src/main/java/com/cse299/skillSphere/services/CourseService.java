@@ -11,8 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Base64;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -166,7 +166,200 @@ public class CourseService {
         return response;
     }
 
-    public List<Category> getAllCategories() {
-        return categoryRepository.findAll();
+    /**
+     * Get course details for editing
+     */
+    @Transactional(readOnly = true)
+    public CourseRequest getCourseForEdit(Integer courseId) {
+        // Find course or throw exception
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new RuntimeException("Course not found with id: " + courseId));
+
+        // Convert to CourseRequest for form
+        CourseRequest courseRequest = new CourseRequest();
+        courseRequest.setCourseId(course.getCourseId());
+        courseRequest.setTitle(course.getTitle());
+        courseRequest.setCourseDate(course.getCourseDate());
+        courseRequest.setCategoryId(course.getCategory().getCategoryId());
+
+        // Add sections
+        List<SectionRequest> sectionRequests = new ArrayList<>();
+        for (Section section : sectionRepository.findAllByCourseCourseId(course.getCourseId())) {
+            SectionRequest sectionRequest = new SectionRequest();
+            sectionRequest.setId(section.getId());
+            sectionRequest.setTitle(section.getTitle());
+            sectionRequest.setDescription(section.getDescription());
+
+            // Add videos
+            List<VideoRequest> videoRequests = new ArrayList<>();
+            for (Video video : videoRepository.findAllBySectionId(section.getId())) {
+                VideoRequest videoRequest = new VideoRequest();
+                videoRequest.setId(video.getId());
+                videoRequest.setTitle(video.getTitle());
+                videoRequest.setDescription(video.getDescription());
+
+                videoRequests.add(videoRequest);
+            }
+
+            sectionRequest.setVideos(videoRequests);
+            sectionRequests.add(sectionRequest);
+        }
+
+        courseRequest.setSections(sectionRequests);
+        return courseRequest;
+    }
+
+    /**
+     * Update an existing course
+     */
+    @Transactional(rollbackFor = {Exception.class})
+    public void updateCourse(CourseRequest courseRequest) {
+        // Find course or throw exception
+        Course course = courseRepository.findById(courseRequest.getCourseId())
+                .orElseThrow(() -> new RuntimeException("Course not found with id: " + courseRequest.getCourseId()));
+
+        // Update basic course info
+        course.setTitle(courseRequest.getTitle());
+        course.setCourseDate(courseRequest.getCourseDate());
+
+        // Update category if changed
+        if (!Objects.equals(courseRequest.getCategoryId(), course.getCategory().getCategoryId())) {
+            Category category = categoryRepository.findById(courseRequest.getCategoryId())
+                    .orElseThrow(() -> new RuntimeException("Category not found with id: " + courseRequest.getCategoryId()));
+            course.setCategory(category);
+        }
+
+        // Save course first to ensure it has an ID
+        course = courseRepository.save(course);
+
+        // Process each section
+        updateCourseSections(course, courseRequest.getSections());
+    }
+
+    /**
+     * Helper method to update course sections
+     */
+    private void updateCourseSections(Course course, List<SectionRequest> sectionRequests) {
+        // Create a map of existing sections by ID for quick lookup
+        Map<Integer, Section> existingSectionsMap = sectionRepository.findAllByCourseCourseId(course.getCourseId()).stream()
+                .collect(Collectors.toMap(Section::getId, section -> section));
+
+        // Keep track of processed section IDs to know which ones to keep
+        Set<Integer> processedSectionIds = new HashSet<>();
+
+        // Process each section in the request
+        for (int i = 0; i < sectionRequests.size(); i++) {
+            SectionRequest sectionRequest = sectionRequests.get(i);
+            Section section;
+
+            // Check if it's an existing section or new one
+            if (sectionRequest.getId() != null && sectionRequest.getId() > 0 && existingSectionsMap.containsKey(sectionRequest.getId())) {
+                // Update existing section
+                section = existingSectionsMap.get(sectionRequest.getId());
+                section.setTitle(sectionRequest.getTitle());
+                section.setDescription(sectionRequest.getDescription());
+                // section.setOrderIndex(i);
+            } else {
+                // Create new section
+                section = new Section();
+                section.setCourse(course);
+                section.setTitle(sectionRequest.getTitle());
+                section.setDescription(sectionRequest.getDescription());
+                // section.setOrderIndex(i);
+            }
+
+            // Save the section first to ensure it has an ID before handling videos
+            section = sectionRepository.saveAndFlush(section);
+
+            // Add this section's ID to the processed set
+            processedSectionIds.add(section.getId());
+
+            // Process videos for this section
+            updateSectionVideos(section, sectionRequest.getVideos());
+        }
+
+        // Find and delete sections that were not processed (meaning they're no longer in the request)
+        List<Section> sectionsToDelete = sectionRepository.findAllByCourseCourseId(course.getCourseId()).stream()
+                .filter(section -> !processedSectionIds.contains(section.getId()))
+                .collect(Collectors.toList());
+
+        if (!sectionsToDelete.isEmpty()) {
+            for (Section s : sectionsToDelete) {
+                videoRepository.deleteAll(videoRepository.findAllBySectionId(s.getId()));
+            }
+            sectionRepository.deleteAll(sectionsToDelete);
+        }
+    }
+
+    /**
+     * Helper method to update section videos
+     */
+    private void updateSectionVideos(Section section, List<VideoRequest> videoRequests) {
+        // Make sure the section is already saved and has an ID
+        if (section.getId() == 0) {
+            throw new IllegalStateException("Section must be saved before adding videos");
+        }
+
+        // Create a map of existing videos by ID for quick lookup
+        Map<Integer, Video> existingVideosMap = videoRepository.findAllBySectionId(section.getId()).stream()
+                .collect(Collectors.toMap(Video::getId, video -> video));
+
+        // Keep track of processed video IDs to know which ones to keep
+        Set<Integer> processedVideoIds = new HashSet<>();
+
+        // Process each video in the request
+        for (int i = 0; i < videoRequests.size(); i++) {
+            VideoRequest videoRequest = videoRequests.get(i);
+            Video video;
+
+            // Check if it's an existing video or new one
+            if (videoRequest.getId() != null && videoRequest.getId() > 0 && existingVideosMap.containsKey(videoRequest.getId())) {
+                // Update existing video
+                video = existingVideosMap.get(videoRequest.getId());
+                video.setTitle(videoRequest.getTitle());
+                video.setDescription(videoRequest.getDescription());
+                // video.setOrderIndex(i);
+
+                // Upload new video file if provided
+                if (videoRequest.getFile() != null && !videoRequest.getFile().isEmpty()) {
+                    // Remove old video file from MinIO
+                    minIOService.deleteFile(video.getFilePath());
+                    video.setFilePath(minIOService.uploadFile(videoRequest.getFile()));
+                }
+            } else {
+                // Create new video
+                video = new Video();
+                video.setSection(section);
+                video.setTitle(videoRequest.getTitle());
+                video.setDescription(videoRequest.getDescription());
+                // video.setOrderIndex(i);
+
+                // Upload new video file
+                if (videoRequest.getFile() != null && !videoRequest.getFile().isEmpty()) {
+                    String filePath = minIOService.uploadFile(videoRequest.getFile());
+                    video.setFilePath(filePath);
+                } else {
+                    throw new IllegalArgumentException("Video file is required for new videos");
+                }
+            }
+
+            // Save the video and add its ID to processed set
+            video = videoRepository.save(video);
+            processedVideoIds.add(video.getId());
+        }
+
+        // Find and delete videos that were not processed (meaning they're no longer in the request)
+        List<Video> videosToDelete = videoRepository.findAllBySectionId(section.getId()).stream()
+                .filter(video -> !processedVideoIds.contains(video.getId()))
+                .collect(Collectors.toList());
+
+        if (!videosToDelete.isEmpty()) {
+            // Delete video files from MinIO
+            for (Video video : videosToDelete) {
+                minIOService.deleteFile(video.getFilePath());
+            }
+
+            videoRepository.deleteAll(videosToDelete);
+        }
     }
 }
