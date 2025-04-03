@@ -1,6 +1,8 @@
 package com.cse299.skillSphere;
 
+import com.cse299.skillSphere.models.Category;
 import com.cse299.skillSphere.models.Role;
+import com.cse299.skillSphere.repositories.CategoryRepository;
 import com.cse299.skillSphere.repositories.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -13,6 +15,9 @@ public class SkillSphereApplication {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     public static void main(String[] args) {
         SpringApplication.run(SkillSphereApplication.class, args);
@@ -30,6 +35,12 @@ public class SkillSphereApplication {
                 Role user = new Role();
                 user.setName("ROLE_USER");
                 roleRepository.save(user);
+            }
+
+            if (categoryRepository.findByNameEqualsIgnoreCase("Java").isEmpty()) {
+                Category cat = new Category();
+                cat.setName("Java");
+                categoryRepository.save(cat);
             }
         };
     }

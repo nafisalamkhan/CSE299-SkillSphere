@@ -8,7 +8,6 @@ import java.util.List;
 public class CourseRequest {
     private String title;
     private String courseDate;
-    private int categoryId;
-    private int instructorId;
+    private Integer categoryId;
     private List<SectionRequest> sections;
 }

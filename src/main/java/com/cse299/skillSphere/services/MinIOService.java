@@ -47,7 +47,7 @@ public class MinIOService {
                     .contentType(file.getContentType())
                     .build());
 
-            return "%s/%s".formatted(bucketName, randomName);
+            return randomName;
 
         } catch (MinioException e) {
             throw new RuntimeException("MinIO error occurred: " + e.getMessage(), e);

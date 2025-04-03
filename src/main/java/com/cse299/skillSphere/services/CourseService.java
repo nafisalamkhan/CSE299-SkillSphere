@@ -80,7 +80,7 @@ public class CourseService {
                 SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User instructor = userRepository.findByUsername(principal.getUsername()).orElseThrow();
 
-        Category category = categoryRepository.findById(/*request.getCategoryId()*/ 1).orElseThrow();
+        Category category = categoryRepository.findById(request.getCategoryId()).orElseThrow();
 
         Course course = new Course();
         course.setTitle(request.getTitle());
@@ -138,6 +138,7 @@ public class CourseService {
         response.setCategory(c.getCategory().getName());
         response.setInstructor(c.getInstructor().getName());
         response.setCourseDate(c.getCourseDate());
+        response.setTotalStudent(c.getStudents().size());
 
         List<SectionResponse> sectionResponses = sectionRepository.findAllByCourseCourseId(c.getCourseId()).stream()
                 .map(s -> {
@@ -163,5 +164,9 @@ public class CourseService {
 
         response.setSections(sectionResponses);
         return response;
+    }
+
+    public List<Category> getAllCategories() {
+        return categoryRepository.findAll();
     }
 }
