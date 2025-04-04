@@ -307,11 +307,11 @@
                 </div>`;
 
                 // Show video preview if available
-                if (videoData.url) {
+                if (videoData.filePath) {
                     videoContent += `
                     <div class="current-video">
                         <video class="video-preview" controls>
-                            <source src="${videoData.url}" type="video/mp4">
+                            <source src="http://localhost:9000/skillsphare/${videoData.filePath}" type="video/mp4">
                             Your browser does not support the video tag.
                         </video>
                     </div>`;

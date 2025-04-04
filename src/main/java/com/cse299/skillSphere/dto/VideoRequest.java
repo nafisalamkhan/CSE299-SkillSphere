@@ -8,5 +8,6 @@ public class VideoRequest {
     private Integer id;
     private String title;
     private String description;
+    private String filePath; // for preview while editing
     private MultipartFile file;
 }

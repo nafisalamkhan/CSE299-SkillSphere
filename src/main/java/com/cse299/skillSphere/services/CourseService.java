@@ -213,6 +213,7 @@ public class CourseService {
                 videoRequest.setId(video.getId());
                 videoRequest.setTitle(video.getTitle());
                 videoRequest.setDescription(video.getDescription());
+                videoRequest.setFilePath(video.getFilePath());
 
                 videoRequests.add(videoRequest);
             }
