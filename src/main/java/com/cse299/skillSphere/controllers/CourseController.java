@@ -72,6 +72,7 @@ public class CourseController {
 
             return "courses/edit-course";
         } catch (Exception e) {
+            e.printStackTrace();
             // Handle exceptions - course not found, etc.
             return "redirect:/courses?error=Course not found";
         }

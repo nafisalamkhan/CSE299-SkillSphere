@@ -5,6 +5,7 @@ import com.cse299.skillSphere.dto.CourseRequest;
 import com.cse299.skillSphere.models.*;
 import com.cse299.skillSphere.repositories.*;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,9 +27,12 @@ public class CourseService {
 
     @Transactional(rollbackFor = Exception.class)
     public Course createCourse(CourseRequest request) {
-        var principal = (org.springframework.security.core.userdetails.User)
-                SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User instructor = userRepository.findByUsername(principal.getUsername()).orElseThrow();
+        User instructor = getLoggedInUser();
+        if (instructor.getRoles().stream()
+                .map(Role::getName)
+                .noneMatch(rn -> rn.equalsIgnoreCase("ROLE_INSTRUCTOR"))) {
+            throw new RuntimeException("You are not allowed to create courses.");
+        }
 
         //TODO: set categoryId from dto
         Category category = categoryRepository.findById(/*request.getCategoryId()*/ 1).orElseThrow();
@@ -74,11 +78,21 @@ public class CourseService {
         return savedCourse;
     }
 
-    @Transactional(rollbackFor = {Exception.class})
-    public void createCourseToMinIO(CourseRequest request) {
+    @NotNull
+    private User getLoggedInUser() {
         var principal = (org.springframework.security.core.userdetails.User)
                 SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User instructor = userRepository.findByUsername(principal.getUsername()).orElseThrow();
+        return userRepository.findByUsername(principal.getUsername()).orElseThrow();
+    }
+
+    @Transactional(rollbackFor = {Exception.class})
+    public void createCourseToMinIO(CourseRequest request) {
+        User instructor = getLoggedInUser();
+        if (instructor.getRoles().stream()
+                .map(Role::getName)
+                .noneMatch(rn -> rn.equalsIgnoreCase("ROLE_INSTRUCTOR"))) {
+            throw new RuntimeException("You are not allowed to create courses.");
+        }
 
         Category category = categoryRepository.findById(request.getCategoryId()).orElseThrow();
 
@@ -122,10 +136,7 @@ public class CourseService {
     }
 
     public List<CourseResponse> getCoursesForLoggedInInstructor() {
-        var principal = (org.springframework.security.core.userdetails.User)
-                SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User instructor = userRepository.findByUsername(principal.getUsername())
-                .orElseThrow();
+        User instructor = getLoggedInUser();
         return courseRepository.findAllByInstructorId(instructor.getId()).stream()
                 .map(this::getCourseResponse)
                 .toList();
@@ -175,6 +186,11 @@ public class CourseService {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new RuntimeException("Course not found with id: " + courseId));
 
+        User instructor = getLoggedInUser();
+        if (!Objects.equals(course.getInstructor().getId(), instructor.getId())) {
+            throw new RuntimeException("You are not allowed to edit this course.");
+        }
+
         // Convert to CourseRequest for form
         CourseRequest courseRequest = new CourseRequest();
         courseRequest.setCourseId(course.getCourseId());
@@ -217,6 +233,11 @@ public class CourseService {
         // Find course or throw exception
         Course course = courseRepository.findById(courseRequest.getCourseId())
                 .orElseThrow(() -> new RuntimeException("Course not found with id: " + courseRequest.getCourseId()));
+
+        User instructor = getLoggedInUser();
+        if (!Objects.equals(course.getInstructor().getId(), instructor.getId())) {
+            throw new RuntimeException("You are not allowed to edit this course.");
+        }
 
         // Update basic course info
         course.setTitle(courseRequest.getTitle());
