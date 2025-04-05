@@ -1,5 +1,6 @@
 package com.cse299.skillSphere.messages.OneToOne.ChatRoom;
 
+import com.cse299.skillSphere.models.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -10,14 +11,13 @@ import java.util.Optional;
 public class ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
-    public Optional<String> getChatRoomId(String senderID,
-                                          String recipientID,
-                                          boolean createNewRoomIfNotExist){
-        return chatRoomRepository.findBySenderIdAndRecipientId(senderID, recipientID)
+
+    public Optional<String> getChatRoomId(User sender, User recipient, boolean createNewRoomIfNotExist) {
+        return chatRoomRepository.findBySenderIdAndRecipientId(sender.getId().toString(), recipient.getId().toString())
                 .map(ChatRoom::getChatId)
                 .or(() -> {
-                    if (createNewRoomIfNotExist){
-                        var chatId = createChatId(senderID, recipientID);
+                    if (createNewRoomIfNotExist) {
+                        String chatId = createChatId(sender.getId().toString(), recipient.getId().toString());
                         return Optional.of(chatId);
                     }
                     return Optional.empty();
@@ -25,7 +25,7 @@ public class ChatRoomService {
     }
 
     private String createChatId(String senderID, String recipientID) {
-        var chatId = String.format("%s_%s", senderID, recipientID);         //nafis_aciea
+        var chatId = String.format("%s_%s", senderID, recipientID);
 
         ChatRoom senderRecipient = ChatRoom.builder()
                 .chatId(chatId)

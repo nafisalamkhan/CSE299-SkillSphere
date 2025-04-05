@@ -2,6 +2,7 @@ package com.cse299.skillSphere.messages.OneToOne.Chat;
 
 
 import com.cse299.skillSphere.messages.MessageType;
+import com.cse299.skillSphere.models.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,11 +26,13 @@ public class ChatMessage {
     @Column(name = "chatId")
     private String chatId;
 
-    @Column(name = "senderId")
-    private String senderId;
+    @ManyToOne
+    @JoinColumn(name = "sender_id", referencedColumnName = "id")
+    private User sender;
 
-    @Column(name = "recipientId")
-    private String recipientId;
+    @ManyToOne
+    @JoinColumn(name = "recipient_id", referencedColumnName = "id")
+    private User recipient;
 
     @Column(name = "content")
     private String content;

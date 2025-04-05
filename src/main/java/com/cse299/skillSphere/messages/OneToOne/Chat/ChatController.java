@@ -1,9 +1,9 @@
 package com.cse299.skillSphere.messages.OneToOne.Chat;
 
 import ch.qos.logback.core.model.Model;
-import com.cse299.skillSphere.services.ChatbotService;
+import com.cse299.skillSphere.models.User;
+import com.cse299.skillSphere.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -11,7 +11,8 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
@@ -20,18 +21,19 @@ import java.util.List;
 public class ChatController {
     private final SimpMessagingTemplate messagingTemplate;
     private final ChatMessageService chatMessageService;
+    private final UserRepository userRepository;
 
     @MessageMapping("/chat")
     public void processMessage(
             @Payload ChatMessage chatMessage
-    ){
+    ) {
         ChatMessage savedMsg = chatMessageService.save(chatMessage);
         messagingTemplate.convertAndSendToUser(
-                chatMessage.getRecipientId(), "/queue/messages",
+                String.valueOf(chatMessage.getRecipient().getId()), "/queue/messages",
                 ChatNotification.builder()
                         .id(savedMsg.getId())
-                        .senderId(savedMsg.getSenderId())
-                        .recipientId(savedMsg.getRecipientId())
+                        .senderId(String.valueOf(savedMsg.getSender().getId())) // Convert Long to String
+                        .recipientId(String.valueOf(savedMsg.getRecipient().getId())) //  Convert Long to String
                         .content(savedMsg.getContent())
                         .build()
         );
@@ -39,10 +41,12 @@ public class ChatController {
 
     @GetMapping("/messages/{senderId}/{recipientId}")
     public ResponseEntity<List<ChatMessage>> findChatMessage(
-            @PathVariable("senderId") String senderId,
-            @PathVariable("recipientId") String recipientId
-    ){
-        return ResponseEntity.ok(chatMessageService.findChatMessages(senderId, recipientId));
+            @PathVariable Long senderId,
+            @PathVariable Long recipientId
+    ) {
+        User sender = userRepository.findById(senderId).orElseThrow();
+        User recipient = userRepository.findById(recipientId).orElseThrow();
+        return ResponseEntity.ok(chatMessageService.findChatMessages(sender, recipient));
     }
 
 
@@ -63,34 +67,7 @@ public class ChatController {
             SimpMessageHeaderAccessor headerAccessor
     ){
         // adding username in ws session
-        headerAccessor.getSessionAttributes().put("username", chatMessage.getSenderId());
+        headerAccessor.getSessionAttributes().put("username", chatMessage.getId());
         return chatMessage;
     }
-
-
-
-    //chatbot
-
-    @Autowired
-    private ChatbotService chatBotService;
-
-    @GetMapping("/chatbot")
-    public String showChat(Model model) {
-        @SuppressWarnings("unused")
-        List<String> questions = chatBotService.getAllQuestions();
-        // model.addAttribute("message", new String());
-        return "chat";
-    }
-    @ModelAttribute("questions")
-    public List<String> questions(){
-        List<String> questions = chatBotService.getAllQuestions();
-        return questions;
-    }
-    @PostMapping("/chatbot")
-    public String chat(@RequestParam("message") String message, Model model) {
-        String response = chatBotService.handleInput(message);
-        // model.addAttribute("response", response);
-        return "chat";
-    }
-
 }
