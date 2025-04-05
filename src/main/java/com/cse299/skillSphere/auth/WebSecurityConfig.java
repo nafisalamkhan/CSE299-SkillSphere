@@ -1,6 +1,6 @@
 package com.cse299.skillSphere.auth;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -15,15 +15,12 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 @EnableMethodSecurity(jsr250Enabled = true)
 public class WebSecurityConfig {
 
     private final AuthenticationFailureHandler customAuthenticationFailureHandler;
-
-    @Autowired // optional
-    public WebSecurityConfig(AuthenticationFailureHandler customAuthenticationFailureHandler) {
-        this.customAuthenticationFailureHandler = customAuthenticationFailureHandler;
-    }
+    private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -38,6 +35,7 @@ public class WebSecurityConfig {
                         .loginPage("/login")
                         .defaultSuccessUrl("/", true)
                         .failureHandler(customAuthenticationFailureHandler)
+                        .successHandler(customAuthenticationSuccessHandler)
                 )
                 .logout(logout -> logout
                         .logoutSuccessUrl("/login?logout=true")
