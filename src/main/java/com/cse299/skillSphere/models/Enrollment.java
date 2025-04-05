@@ -3,6 +3,8 @@ package com.cse299.skillSphere.models;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 
 @Entity
 @Table(name = "enrollment")
@@ -21,5 +23,4 @@ public class Enrollment {
     @ManyToOne
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
-
 }
