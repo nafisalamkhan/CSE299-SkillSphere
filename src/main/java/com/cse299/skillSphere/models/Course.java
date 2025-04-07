@@ -39,4 +39,6 @@ public class Course {
             inverseJoinColumns = @JoinColumn(name = "StudentID")
     )
     private Set<User> students = new HashSet<>();
+
+    private String courseImageFilePath;
 }

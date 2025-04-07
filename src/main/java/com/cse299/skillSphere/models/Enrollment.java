@@ -1,9 +1,8 @@
 package com.cse299.skillSphere.models;
 
 import jakarta.persistence.*;
-import lombok.*;
-
-import java.util.List;
+import lombok.Data;
+import org.hibernate.annotations.ColumnDefault;
 
 
 @Entity
@@ -17,10 +16,14 @@ public class Enrollment {
     private int enrollmentId;
 
     @ManyToOne
-    @JoinColumn(name = "StudentID")
+    @JoinColumn(name = "StudentID", nullable = false)
     private User student;
 
     @ManyToOne
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
+
+    @ColumnDefault("false")
+    @Column(name = "is_completed", nullable = false)
+    private Boolean isCompleted;
 }

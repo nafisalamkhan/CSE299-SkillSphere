@@ -46,7 +46,7 @@
             color: #555;
         }
 
-        input[type="text"], input[type="email"], input[type="password"], select {
+        input[type="text"], input[type="file"], input[type="email"], input[type="password"], select {
             width: 100%;
             padding: 10px;
             margin-bottom: 20px;
@@ -133,6 +133,9 @@
         <select id="role" th:field="*{role}" required>
             <option th:each="role : ${roles}" th:value="${role.value}" th:text="${role.text}"></option>
         </select><br/>
+
+        <label for="image">Profile image</label>
+        <input id="image" th:field="*{profileImage}" type="file" accept="image/*" required>
 
         <button type="submit">Register</button>
 

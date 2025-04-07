@@ -123,6 +123,10 @@
         <!-- Course Basic Information -->
         <div class="mb-4">
             <h4 class="mb-3"><i class="fas fa-info-circle me-2"></i>Course Information</h4>
+
+            <label for="courseImage">Course image</label>
+            <input id="courseImage" type="file" th:field="*{courseImage}" accept="image/*" required>
+
             <div class="mb-3">
                 <label for="title" class="form-label">Course Title</label>
                 <input type="text" class="form-control" id="title" th:field="*{title}" required

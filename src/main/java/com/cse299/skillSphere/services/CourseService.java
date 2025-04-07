@@ -4,6 +4,7 @@ import com.cse299.skillSphere.dto.*;
 import com.cse299.skillSphere.dto.CourseRequest;
 import com.cse299.skillSphere.models.*;
 import com.cse299.skillSphere.repositories.*;
+import com.cse299.skillSphere.utils.AuthUtils;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,6 +25,8 @@ public class CourseService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final MinIOService minIOService;
+    private final EnrollmentRepository enrollmentRepository;
+    private final AuthUtils authUtils;
 
     @Transactional(rollbackFor = Exception.class)
     public Course createCourse(CourseRequest request) {
@@ -102,6 +105,10 @@ public class CourseService {
         course.setCategory(category);
         course.setInstructor(instructor);
 
+        if (request.getCourseImage() != null && !request.getCourseImage().isEmpty()) {
+            course.setCourseImageFilePath(minIOService.uploadFile(request.getCourseImage()));
+        }
+
         Course savedCourse = courseRepository.save(course);
 
         for (SectionRequest sectionRequest : request.getSections()) {
@@ -138,7 +145,7 @@ public class CourseService {
     public List<CourseResponse> getCoursesForLoggedInInstructor() {
         User instructor = getLoggedInUser();
         return courseRepository.findAllByInstructorId(instructor.getId()).stream()
-                .map(this::getCourseResponse)
+                .map(this::mapToCourseResponse)
                 .toList();
     }
 
@@ -150,6 +157,7 @@ public class CourseService {
         response.setInstructor(c.getInstructor().getName());
         response.setCourseDate(c.getCourseDate());
         response.setTotalStudent(c.getStudents().size());
+        response.setCourseImageFilePath(c.getCourseImageFilePath());
 
         List<SectionResponse> sectionResponses = sectionRepository.findAllByCourseCourseId(c.getCourseId()).stream()
                 .map(s -> {
@@ -383,5 +391,59 @@ public class CourseService {
 
             videoRepository.deleteAll(videosToDelete);
         }
+    }
+
+    public List<CourseResponse> getAllCoursesForUser() {
+        return courseRepository.findAll().stream()
+                .map(this::mapToCourseResponse)
+                .toList();
+    }
+
+    private CourseResponse mapToCourseResponse(Course course) {
+        return CourseResponse.builder()
+                .courseId(course.getCourseId())
+                .courseDate(course.getCourseDate())
+                .title(course.getTitle())
+                .category(course.getCategory().getName())
+                .instructor(course.getInstructor().getName())
+                .courseImageFilePath(course.getCourseImageFilePath())
+                .sections(sectionRepository
+                        .findAllByCourseCourseId(course.getCourseId()).stream()
+                        .map(this::mapToSectionResponse).toList())
+                .totalStudent(course.getStudents().size())
+                .build();
+    }
+
+    private SectionResponse mapToSectionResponse(Section section) {
+        return SectionResponse.builder()
+                .title(section.getTitle())
+                .description(section.getDescription())
+                .videos(videoRepository
+                        .findAllBySectionId(section.getId()).stream()
+                        .map(this::mapToVideoResponse).toList())
+                .build();
+    }
+
+    private VideoResponse mapToVideoResponse(Video video) {
+        return VideoResponse.builder()
+                .title(video.getTitle())
+                .filePath(video.getFilePath())
+                .description(video.getDescription())
+                .fileName(video.getFileName())
+                .fileType(video.getFileType())
+                .build();
+    }
+
+    public CourseResponse getCourseById(Integer courseId) {
+        return courseRepository
+                .findById(courseId)
+                .map(this::mapToCourseResponse)
+                .orElseThrow(() -> new RuntimeException("Course not found!"));
+    }
+
+    public List<CourseResponse> getEnrolledCourses() {
+        return enrollmentRepository
+                .findAllCoursesByStudentId(authUtils.getLoggedInUser().getId()).stream()
+                .map(this::mapToCourseResponse).toList();
     }
 }

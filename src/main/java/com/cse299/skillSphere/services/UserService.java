@@ -31,6 +31,8 @@ public class UserService implements UserDetailsService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private MinIOService minIOService;
 
 
     public User registerUser(UserRequest userRequest) {
@@ -43,6 +45,10 @@ public class UserService implements UserDetailsService {
         Role userRole = roleRepository.findByName(userRequest.getRole())
                 .orElseThrow(() -> new RuntimeException("Role not found!"));
         user.setRoles(Set.of(userRole));
+
+        if (userRequest.getProfileImage() != null && !userRequest.getProfileImage().isEmpty()) {
+            user.setProfileImageFilePath(minIOService.uploadFile(userRequest.getProfileImage()));
+        }
 
         return userRepository.save(user);
     }

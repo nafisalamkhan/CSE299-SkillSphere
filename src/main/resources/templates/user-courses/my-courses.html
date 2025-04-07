@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Courses | Learning Platform</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .course-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+        }
+
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-img-top {
+            height: 180px;
+            object-fit: cover;
+        }
+
+        .instructor-name {
+            color: #5624d0;
+            font-weight: 600;
+        }
+
+        .rating {
+            color: #eb8a2f;
+        }
+
+        .course-level {
+            background-color: #f7f9fa;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .category-badge {
+            background-color: #eceb98;
+            color: #3c3b37;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .navbar-learning {
+            background-color: #1c1d1f;
+        }
+
+        .search-input {
+            width: 30%;
+        }
+
+        .filters {
+            background-color: #f7f9fa;
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        .students-count {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+
+        .course-date {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+
+        .progress {
+            height: 8px;
+        }
+
+        .progress-value {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+
+        .last-accessed {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+
+        .course-tabs .nav-link {
+            color: #1c1d1f;
+            font-weight: 500;
+        }
+
+        .course-tabs .nav-link.active {
+            color: #5624d0;
+            border-bottom: 3px solid #5624d0;
+        }
+
+        .continue-btn {
+            background-color: #5624d0;
+            border-color: #5624d0;
+        }
+
+        .continue-btn:hover {
+            background-color: #4b1fa8;
+            border-color: #4b1fa8;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            background-color: #f7f9fa;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark navbar-learning">
+    <div class="container">
+        <a class="navbar-brand" href="/user/courses">Learning Platform</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/user/courses">Courses</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/user/courses/my-courses">My Learning</a>
+                </li>
+            </ul>
+            <form class="d-flex search-input mx-auto">
+                <input class="form-control me-2" type="search" placeholder="Search my courses">
+                <button class="btn btn-outline-light" type="submit"><i class="fas fa-search"></i></button>
+            </form>
+            <div class="navbar-nav ms-auto">
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                       data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle"></i> <span sec:authentication="name">Username</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="/user/profile">Profile</a></li>
+                        <li><a class="dropdown-item" href="/user/settings">Settings</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li>
+                            <form th:action="@{/logout}" method="post">
+                                <button class="dropdown-item" type="submit">Logout</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container mt-4">
+    <h2>My Learning</h2>
+
+    <!-- Navigation tabs -->
+    <ul class="nav nav-tabs course-tabs mt-4 mb-4">
+        <li class="nav-item">
+            <a class="nav-link active" href="#" id="all-courses-tab">All Courses</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" id="in-progress-tab">In Progress</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" id="completed-tab">Completed</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" id="archived-tab">Archived</a>
+        </li>
+    </ul>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="input-group">
+                <select class="form-select me-2" style="max-width: 200px;" id="sort-select">
+                    <option selected value="recent">Sort by: Recently Accessed</option>
+                    <option value="title">Sort by: Title A-Z</option>
+                    <option value="progress">Sort by: Progress</option>
+                </select>
+                <select class="form-select" style="max-width: 200px;" id="category-filter">
+                    <option selected value="">All Categories</option>
+                    <option th:each="category : ${categories}"
+                            th:value="${category.categoryId}"
+                            th:text="${category.name}">Category
+                    </option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Course Cards -->
+    <div class="row g-4" id="course-container">
+        <!-- Empty state message when no courses are available -->
+        <div class="col-12 empty-state" th:if="${#lists.isEmpty(courses)}">
+            <i class="fas fa-book-open fa-3x mb-3" style="color: #6c757d;"></i>
+            <h4>You haven't enrolled in any courses yet</h4>
+            <p class="text-muted">Browse our course catalog to find something you're interested in.</p>
+            <a href="/user/courses" class="btn btn-primary mt-2">Explore Courses</a>
+        </div>
+
+        <!-- Dynamic course cards -->
+        <div class="col-md-6 col-lg-4" th:each="course : ${courses}" th:id="'course-' + ${course.courseId}">
+            <div class="card course-card h-100">
+                <img th:src="'http://localhost:9000/skillsphare/'+${course.courseImageFilePath}" class="card-img-top"
+                     alt="Course Image">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title" th:text="${course.title}">Course Title</h5>
+                    <p class="mb-1"><span class="instructor-name" th:text="${course.instructor}">Instructor Name</span>
+                    </p>
+                    <div class="mb-2">
+                        <span class="category-badge" th:text="${course.category}">Category</span>
+                    </div>
+
+                    <!-- Calculate progress based on sections/videos -->
+                    <div th:with="totalVideos=${10},
+                        watchedVideos=${2},
+                        progressPercentage=${totalVideos > 0 ? (watchedVideos * 100 / totalVideos) : 0}">
+
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-success" role="progressbar"
+                                 th:style="'width: ' + ${progressPercentage} + '%'"
+                                 th:aria-valuenow="${progressPercentage}"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100"></div>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="progress-value"
+                                  th:text="${progressPercentage} + '% complete'">0% complete</span>
+                            <span class="students-count">
+                                    <i class="fas fa-users me-1"></i> <span th:text="${course.totalStudent}">0</span> students
+                                </span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-3">
+                            <span class="course-date">
+                                <i class="far fa-calendar-alt me-1"></i> <span
+                                    th:text="${course.courseDate}">Date</span>
+                            </span>
+                    </div>
+
+                    <div class="mt-auto">
+                        <div class="d-flex justify-content-between">
+                            <!-- Dynamic button text based on progress -->
+                            <a th:href="@{/user/courses/{id}/content(id=${course.courseId})}"
+                               class="btn btn-primary continue-btn"
+                               th:classappend="${progressPercentage == 100 ? 'btn-success' : 'continue-btn'}"
+                               th:text="${progressPercentage == 0 ? 'Start Course' : (progressPercentage == 100 ? 'Review Course' : 'Continue Learning')}">
+                                Continue Learning
+                            </a>
+                            <a th:href="@{/user/courses/{id}(id=${course.courseId})}" class="btn btn-outline-secondary">Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination (only show if needed) -->
+    <nav aria-label="Course pagination" class="mt-4" th:if="${!#lists.isEmpty(courses) && courses.size() > 6}">
+        <ul class="pagination justify-content-center">
+            <li class="page-item disabled">
+                <a class="page-link" href="#" tabindex="-1">Previous</a>
+            </li>
+            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+            <li class="page-item"><a class="page-link" href="#">2</a></li>
+            <li class="page-item">
+                <a class="page-link" href="#">Next</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+<!-- Footer -->
+<footer class="bg-dark text-white py-4 mt-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <h5>Learning Platform</h5>
+                <p>Expand your skills with expert-led courses.</p>
+            </div>
+            <div class="col-md-4">
+                <h5>Links</h5>
+                <ul class="list-unstyled">
+                    <li><a href="#" class="text-white">About Us</a></li>
+                    <li><a href="#" class="text-white">Contact</a></li>
+                    <li><a href="#" class="text-white">Terms of Service</a></li>
+                    <li><a href="#" class="text-white">Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h5>Follow Us</h5>
+                <div class="social-icons">
+                    <a href="#" class="text-white me-2"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="text-white me-2"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="text-white me-2"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="text-white"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-3">
+            <p>&copy; 2025 Learning Platform. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+<!-- JavaScript for filtering and sorting -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Get reference to filter elements
+        const allCoursesTab = document.getElementById('all-courses-tab');
+        const inProgressTab = document.getElementById('in-progress-tab');
+        const completedTab = document.getElementById('completed-tab');
+        const archivedTab = document.getElementById('archived-tab');
+        const sortSelect = document.getElementById('sort-select');
+        const categoryFilter = document.getElementById('category-filter');
+
+        // Function to get course progress
+        function getCourseProgress(courseElement) {
+            const progressBar = courseElement.querySelector('.progress-bar');
+            return progressBar ? parseInt(progressBar.getAttribute('aria-valuenow') || '0') : 0;
+        }
+
+        // Function to filter courses by progress
+        function filterByProgress(minProgress, maxProgress) {
+            const courses = document.querySelectorAll('#course-container > div[id^="course-"]');
+
+            courses.forEach(course => {
+                const progress = getCourseProgress(course);
+                if (progress >= minProgress && progress <= maxProgress) {
+                    course.style.display = '';
+                } else {
+                    course.style.display = 'none';
+                }
+            });
+        }
+
+        // Function to filter courses by category
+        function filterByCategory(category) {
+            if (!category) {
+                // Show all courses if no category is selected
+                document.querySelectorAll('#course-container > div[id^="course-"]').forEach(course => {
+                    course.style.display = '';
+                });
+                return;
+            }
+
+            const courses = document.querySelectorAll('#course-container > div[id^="course-"]');
+            courses.forEach(course => {
+                const courseCategoryElement = course.querySelector('.category-badge');
+                const courseCategory = courseCategoryElement ? courseCategoryElement.textContent.trim() : '';
+
+                if (courseCategory === category) {
+                    course.style.display = '';
+                } else {
+                    course.style.display = 'none';
+                }
+            });
+        }
+
+        // Function to sort courses
+        function sortCourses(sortBy) {
+            const courseContainer = document.getElementById('course-container');
+            const courses = Array.from(courseContainer.querySelectorAll('div[id^="course-"]'));
+
+            courses.sort((a, b) => {
+                if (sortBy === 'title') {
+                    const titleA = a.querySelector('.card-title').textContent.trim().toLowerCase();
+                    const titleB = b.querySelector('.card-title').textContent.trim().toLowerCase();
+                    return titleA.localeCompare(titleB);
+                } else if (sortBy === 'progress') {
+                    const progressA = getCourseProgress(a);
+                    const progressB = getCourseProgress(b);
+                    return progressB - progressA; // Sort by progress (descending)
+                }
+                // Default: recent (no sort, keep original order)
+                return 0;
+            });
+
+            // Re-append sorted courses
+            courses.forEach(course => {
+                courseContainer.appendChild(course);
+            });
+        }
+
+        // Add event listeners
+        allCoursesTab.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelectorAll('.nav-link').forEach(tab => tab.classList.remove('active'));
+            this.classList.add('active');
+            document.querySelectorAll('#course-container > div[id^="course-"]').forEach(course => {
+                course.style.display = '';
+            });
+        });
+
+        inProgressTab.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelectorAll('.nav-link').forEach(tab => tab.classList.remove('active'));
+            this.classList.add('active');
+            filterByProgress(1, 99); // 1-99% progress
+        });
+
+        completedTab.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelectorAll('.nav-link').forEach(tab => tab.classList.remove('active'));
+            this.classList.add('active');
+            filterByProgress(100, 100); // 100% progress
+        });
+
+        archivedTab.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelectorAll('.nav-link').forEach(tab => tab.classList.remove('active'));
+            this.classList.add('active');
+            // For now, show no courses as archived (could be expanded with actual archive functionality)
+            document.querySelectorAll('#course-container > div[id^="course-"]').forEach(course => {
+                course.style.display = 'none';
+            });
+        });
+
+        sortSelect.addEventListener('change', function () {
+            sortCourses(this.value);
+        });
+
+        categoryFilter.addEventListener('change', function () {
+            filterByCategory(this.text);
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,10 +1,14 @@
 package com.cse299.skillSphere.services;
 
+import com.cse299.skillSphere.dto.CourseResponse;
 import com.cse299.skillSphere.models.Course;
+import com.cse299.skillSphere.models.Enrollment;
 import com.cse299.skillSphere.models.Role;
 import com.cse299.skillSphere.models.User;
 import com.cse299.skillSphere.repositories.CourseRepository;
+import com.cse299.skillSphere.repositories.EnrollmentRepository;
 import com.cse299.skillSphere.repositories.UserRepository;
+import com.cse299.skillSphere.utils.AuthUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +20,8 @@ import java.util.Set;
 public class EnrollmentService {
     private final UserRepository userRepository;
     private final CourseRepository courseRepository;
+    private final EnrollmentRepository enrollmentRepository;
+    private final AuthUtils authUtils;
 
     //enroll a student in a course
     public String enrollStudent(String studentUsername, String courseName) {
@@ -79,5 +85,40 @@ public class EnrollmentService {
         course.getStudents().remove(student);
         courseRepository.save(course);
         return "Student removed successfully!";
+    }
+
+    public boolean isUserEnrolled(Integer courseId) {
+        return enrollmentRepository.existsByStudentIdAndCourseCourseId(authUtils.getLoggedInUser().getId(), courseId);
+    }
+
+    public boolean isCourseCompleted(Integer courseId) {
+        return enrollmentRepository.isCourseCompleted(authUtils.getLoggedInUser().getId(), courseId);
+    }
+
+    public void enrollUserToCourse(Integer courseId) {
+        User student = authUtils.getLoggedInUser();
+        if (!enrollmentRepository.existsByStudentIdAndCourseCourseId(student.getId(), courseId)) {
+            Enrollment enrollment = new Enrollment();
+            enrollment.setStudent(student);
+            enrollment.setCourse(courseRepository.findById(courseId)
+                    .orElseThrow(() -> new RuntimeException("Course not found")));
+            enrollment.setIsCompleted(false);
+            enrollmentRepository.save(enrollment);
+        } else {
+            // already enrolled
+        }
+    }
+
+    public void markCourseAsCompleted(Integer courseId) {
+        User student = authUtils.getLoggedInUser();
+        if (!enrollmentRepository.existsByStudentIdAndCourseCourseId(student.getId(), courseId)) {
+            throw new RuntimeException("You are not enrolled to this course.");
+        }
+        Enrollment enrollment = enrollmentRepository
+                .findByStudentIdAndCourseCourseId(student.getId(), courseId)
+                .orElseThrow();
+        enrollment.setIsCompleted(true);
+        enrollmentRepository.save(enrollment);
+
     }
 }
