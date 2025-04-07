@@ -31,11 +31,17 @@ public class UserService implements UserDetailsService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
     @Autowired
     private MinIOService minIOService;
 
 
     public User registerUser(UserRequest userRequest) {
+
+        if (userRepository.existsByUsernameEqualsIgnoreCase(userRequest.getUsername())) {
+            throw new RuntimeException("Username not available.");
+        }
+
         User user = new User();
         user.setName(userRequest.getName());
         user.setEmail(userRequest.getEmail());

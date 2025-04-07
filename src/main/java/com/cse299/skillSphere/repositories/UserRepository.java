@@ -23,5 +23,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     //for one to one messaging
     List<User> findAllByStatus(Status status);
+
+    boolean existsByUsernameEqualsIgnoreCase(String username);
 }
 
