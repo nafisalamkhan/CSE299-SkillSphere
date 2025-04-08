@@ -2,7 +2,9 @@ package com.cse299.skillSphere.services;
 
 import io.minio.*;
 import io.minio.errors.MinioException;
+import jakarta.annotation.PostConstruct;
 import org.apache.commons.io.FilenameUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -11,15 +13,22 @@ import java.util.UUID;
 @Service
 public class MinIOService {
 
-    private final MinioClient minioClient;
+    @Value("${minio.url:http://localhost:9000}")
+    private String minioUrl;
 
-    private final String bucketName = "skillsphare"; // Your MinIO bucket name
-    private final String minioUrl = "http://localhost:9000"; // MinIO URL
-    private final String accessKey = "accesskey"; // Your MinIO access key
-    private final String secretKey = "secretkey"; // Your MinIO secret key
+    @Value("${minio.bucket.name:skillsphare}")
+    private String bucketName;
 
-    // Constructor to initialize MinIO client
-    public MinIOService() {
+    @Value("${minio.access.key:minioadmin}")
+    private String accessKey;
+
+    @Value("${minio.secret.key:minioadmin}")
+    private String secretKey;
+
+    private MinioClient minioClient;
+
+    @PostConstruct
+    private void initializeMinio() {
         try {
             this.minioClient = MinioClient.builder()
                     .endpoint(minioUrl)
@@ -36,6 +45,26 @@ public class MinIOService {
             // Check if the bucket exists, if not, create it
             if (!minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build())) {
                 minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
+                // Define the bucket policy for public read access
+                String policyJson = "{\n" +
+                                    "  \"Version\": \"2012-10-17\",\n" +
+                                    "  \"Statement\": [\n" +
+                                    "    {\n" +
+                                    "      \"Effect\": \"Allow\",\n" +
+                                    "      \"Principal\": \"*\",\n" +
+                                    "      \"Action\": [\n" +
+                                    "        \"s3:GetObject\"\n" +
+                                    "      ],\n" +
+                                    "      \"Resource\": [\n" +
+                                    "        \"arn:aws:s3:::" + bucketName + "/*\"\n" +
+                                    "      ]\n" +
+                                    "    }\n" +
+                                    "  ]\n" +
+                                    "}";
+                minioClient.setBucketPolicy(SetBucketPolicyArgs.builder()
+                        .bucket(bucketName)
+                        .config(policyJson)
+                        .build());
             }
 
             String randomName = UUID.randomUUID() + "." + FilenameUtils.getExtension(file.getOriginalFilename());

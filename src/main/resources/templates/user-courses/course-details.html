@@ -257,7 +257,7 @@
                     <h2 class="mb-4">Your Instructor</h2>
                     <div class="row">
                         <div class="col-md-2">
-                            <img th:src="'http://localhost:9000/skillsphare/'+${instructorImage}" class="instructor-img" alt="Instructor">
+                            <img th:src="${minioUrl}+'/'+${bucketName}+'/'+${instructorImage}" class="instructor-img" alt="Instructor">
                         </div>
                         <div class="col-md-10">
                             <h4 th:text="${course.instructor}">John Doe</h4>
@@ -276,7 +276,7 @@
         <!-- Sidebar -->
         <div class="col-lg-4">
             <div class="course-sidebar sticky-top" style="top: 20px;">
-                <img th:src="'http://localhost:9000/skillsphare/'+${course.courseImageFilePath}" class="sidebar-img"
+                <img th:src="${minioUrl}+'/'+${bucketName}+'/'+${course.courseImageFilePath}" class="sidebar-img"
                      alt="Course Image">
                 <div class="sidebar-body">
                     <div class="d-grid gap-3">

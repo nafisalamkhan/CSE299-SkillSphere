@@ -6,6 +6,7 @@ import com.cse299.skillSphere.services.CourseService;
 import com.cse299.skillSphere.services.EnrollmentService;
 import com.cse299.skillSphere.utils.AuthUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +20,12 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/user/courses")
 public class UserCourseController {
+
+    @Value("${minio.url:http://localhost:9000}")
+    private String minioUrl;
+
+    @Value("${minio.bucket.name:skillsphere}")
+    private String bucketName;
 
     private static final String COURSES_LIST = "/user-courses/courses";
     private static final String MY_COURSES = "/user-courses/my-courses";
@@ -34,6 +41,8 @@ public class UserCourseController {
         // get all courses
         List<CourseResponse> courses = courseService.getAllCoursesForUser();
         model.addAttribute("courses", courses);
+        model.addAttribute("bucketName", bucketName);
+        model.addAttribute("minioUrl", minioUrl);
         return COURSES_LIST;
     }
 
@@ -43,6 +52,8 @@ public class UserCourseController {
         List<CourseResponse> enrolledCourses = courseService.getEnrolledCourses();
         model.addAttribute("courses", enrolledCourses);
         model.addAttribute("categories", categoryService.getAllCategories());
+        model.addAttribute("bucketName", bucketName);
+        model.addAttribute("minioUrl", minioUrl);
         return MY_COURSES;
     }
 
@@ -56,6 +67,8 @@ public class UserCourseController {
         model.addAttribute("isEnrolled", isEnrolled);
         model.addAttribute("isCompleted", isCompleted);
         model.addAttribute("instructorImage", authUtils.getLoggedInUser().getProfileImageFilePath());
+        model.addAttribute("bucketName", bucketName);
+        model.addAttribute("minioUrl", minioUrl);
 
         return COURSE_DETAILS;
     }

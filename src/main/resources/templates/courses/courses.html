@@ -330,13 +330,13 @@
 
                     <!-- The video element (hidden) to load the video and get the duration -->
                     <video id="video_{{video.id}}" style="display: none;" preload="metadata">
-                        <source th:src="@{'http://localhost:9000/skillsphare/' + ${video.filePath}}" type="video/mp4">
+                        <source th:src="@{${minioUrl}+'/'+ ${bucketName} +'/'+ ${video.filePath}}" type="video/mp4">
                     </video>
 
                     <!-- Video Duration will be populated here -->
                     <div class="video-duration" id="duration_{{video.id}}">Loading...</div>
 
-                    <a th:href="@{'http://localhost:9000/skillsphare/' + ${video.filePath}}"
+                    <a th:href="@{${minioUrl}+'/' + ${bucketName} +'/'+ ${video.filePath}}"
                        target="_blank" class="btn-udemy-outline btn-sm ms-2">
                         <i class="fas fa-external-link-alt"></i>
                     </a>

@@ -6,6 +6,7 @@ import com.cse299.skillSphere.models.Category;
 import com.cse299.skillSphere.services.CategoryService;
 import com.cse299.skillSphere.services.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,6 +20,12 @@ import java.util.List;
 @RequestMapping("/courses")
 @PreAuthorize("hasRole('ROLE_INSTRUCTOR')")
 public class InstructorCourseController {
+
+    @Value("${minio.url:http://localhost:9000}")
+    private String minioUrl;
+
+    @Value("${minio.bucket.name:skillsphere}")
+    private String bucketName;
 
     @Autowired
     private CourseService courseService;
@@ -47,6 +54,8 @@ public class InstructorCourseController {
     @GetMapping
     public String courses(Model model) {
         List<CourseResponse> courses = courseService.getCoursesForLoggedInInstructor();
+        model.addAttribute("minioUrl", minioUrl);
+        model.addAttribute("bucketName", bucketName);
         model.addAttribute("courses", courses);
         model.addAttribute("totalStudents", courses.stream().mapToInt(CourseResponse::getTotalStudent).sum());
         model.addAttribute("totalSections", courses.stream().mapToInt(it -> it.getSections().size()).sum());
@@ -64,6 +73,8 @@ public class InstructorCourseController {
 
     @GetMapping("/edit/{courseId}")
     public String showEditCourseForm(@PathVariable Integer courseId, Model model) {
+        model.addAttribute("minioUrl", minioUrl);
+        model.addAttribute("bucketName", bucketName);
         try {
             // Get course details for editing
             CourseRequest courseRequest = courseService.getCourseForEdit(courseId);
