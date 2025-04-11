@@ -19,9 +19,9 @@ public class CourseResponse {
     private String category;
     private String instructor;
     private String courseImageFilePath;
+    private Integer totalVideos;
     private List<SectionResponse> sections;
 
     // for logged-in user
-    private Integer totalVideos;
     private Integer watchedVideos;
 }
