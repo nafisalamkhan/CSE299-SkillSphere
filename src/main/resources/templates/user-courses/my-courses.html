@@ -162,7 +162,7 @@
     <h2>My Learning</h2>
 
     <!-- Navigation tabs -->
-    <ul class="nav nav-tabs course-tabs mt-4 mb-4">
+    <!--<ul class="nav nav-tabs course-tabs mt-4 mb-4">
         <li class="nav-item">
             <a class="nav-link active" href="#" id="all-courses-tab">All Courses</a>
         </li>
@@ -175,25 +175,39 @@
         <li class="nav-item">
             <a class="nav-link" href="#" id="archived-tab">Archived</a>
         </li>
-    </ul>
+    </ul>-->
 
     <!-- Filters -->
     <div class="row mb-4">
         <div class="col-md-8">
-            <div class="input-group">
-                <select class="form-select me-2" style="max-width: 200px;" id="sort-select">
-                    <option selected value="recent">Sort by: Recently Accessed</option>
-                    <option value="title">Sort by: Title A-Z</option>
-                    <option value="progress">Sort by: Progress</option>
-                </select>
-                <select class="form-select" style="max-width: 200px;" id="category-filter">
-                    <option selected value="">All Categories</option>
-                    <option th:each="category : ${categories}"
-                            th:value="${category.categoryId}"
-                            th:text="${category.name}">Category
-                    </option>
-                </select>
-            </div>
+            <form action="/user/courses/my-courses" method="get" id="categoryFilterForm">
+                <div class="filter-container p-3 rounded" style="background-color: #f7f9fa; border: 1px solid #e3e6e8;">
+                    <div class="d-flex align-items-center">
+                        <div class="filter-icon me-3">
+                            <i class="fas fa-filter text-primary" style="font-size: 1.2rem;"></i>
+                        </div>
+                        <div class="filter-label me-3">
+                            <label for="category-filter" class="form-label mb-0 fw-bold">Filter by:</label>
+                        </div>
+                        <div class="filter-select flex-grow-1">
+                            <select class="form-select border-primary" id="category-filter" name="categoryId"
+                                    onchange="this.form.submit()" style="max-width: 250px; border-radius: 6px;">
+                                <option value="">All Categories</option>
+                                <option th:each="category : ${categories}"
+                                        th:value="${category.categoryId}"
+                                        th:text="${category.name}"
+                                        th:selected="${category.categoryId == selectedCategoryId}">Category
+                                </option>
+                            </select>
+                        </div>
+                        <div class="ms-3" th:if="${selectedCategoryId != null}">
+                            <a href="/user/courses/my-courses" class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i> Clear
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -221,8 +235,8 @@
                     </div>
 
                     <!-- Calculate progress based on sections/videos -->
-                    <div th:with="totalVideos=${10},
-                        watchedVideos=${2},
+                    <div th:with="totalVideos=${course.totalVideos},
+                        watchedVideos=${course.watchedVideos},
                         progressPercentage=${totalVideos > 0 ? (watchedVideos * 100 / totalVideos) : 0}">
 
                         <div class="progress mb-2">
@@ -236,7 +250,7 @@
                             <span class="progress-value"
                                   th:text="${progressPercentage} + '% complete'">0% complete</span>
                             <span class="students-count">
-                                    <i class="fas fa-users me-1"></i> <span th:text="${course.totalStudent}">0</span> students
+                                    <i class="fas fa-users me-1"></i> <span th:text="${course.totalStudent}">0</span> student(s)
                                 </span>
                         </div>
                     </div>

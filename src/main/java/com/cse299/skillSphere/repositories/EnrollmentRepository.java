@@ -32,4 +32,12 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
     List<Course> findAllCoursesByStudentId(Long userId);
 
     Optional<Enrollment> findByStudentIdAndCourseCourseId(Long id, Integer courseId);
+
+    int countAllStudentsByCourseCourseId(int courseId);
+
+    @Query(value = """
+            select en.course from Enrollment en where en.student.id = :userId
+            and en.course.category.categoryId = :categoryId
+            """)
+    List<Course> findAllCoursesByStudentIdAndCategoryId(Long userId, Integer categoryId);
 }

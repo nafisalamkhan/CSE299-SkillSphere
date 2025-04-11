@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 
 @Entity
 @Table(name = "enrollment")
@@ -26,4 +29,6 @@ public class Enrollment {
     @ColumnDefault("false")
     @Column(name = "is_completed", nullable = false)
     private Boolean isCompleted;
+
+    private LocalDateTime completionDate;
 }

@@ -124,39 +124,23 @@
             <div class="filters">
                 <h5>Filter Courses</h5>
                 <hr>
-                <h6>Categories</h6>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="webDev">
-                    <label class="form-check-label" for="webDev">Web Development</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="dataSci">
-                    <label class="form-check-label" for="dataSci">Data Science</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="mobileDev">
-                    <label class="form-check-label" for="mobileDev">Mobile Development</label>
-                </div>
-
-                <h6 class="mt-3">Instructors</h6>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="instructor1">
-                    <label class="form-check-label" for="instructor1">John Doe</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="instructor2">
-                    <label class="form-check-label" for="instructor2">Jane Smith</label>
-                </div>
-
-                <h6 class="mt-3">Date Added</h6>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="recent">
-                    <label class="form-check-label" for="recent">Last 30 days</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="older">
-                    <label class="form-check-label" for="older">Older than 3 months</label>
-                </div>
+                <form id="categoryFilterForm" action="/user/courses" method="get">
+                    <h6>Categories</h6>
+                    <div class="form-check" th:each="category : ${categories}">
+                        <input class="form-check-input category-checkbox"
+                               type="checkbox"
+                               name="categoryIds"
+                               th:id="'cat_'+${category.categoryId}"
+                               th:value="${category.categoryId}"
+                               th:checked="${selectedCategoryIds != null && selectedCategoryIds.contains(category.categoryId)}">
+                        <label class="form-check-label"
+                               th:for="'cat_'+${category.categoryId}"
+                               th:text="${category.name}">
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-3">Apply Filters</button>
+                    <a href="/user/courses" class="btn btn-outline-secondary mt-3">Clear Filters</a>
+                </form>
             </div>
         </div>
 
@@ -168,7 +152,8 @@
             <div class="row g-4">
                 <div class="col-md-4" th:each="course : ${courses}">
                     <div class="card course-card h-100">
-                        <img th:src="${minioUrl}+'/'+${bucketName}+'/'+${course.courseImageFilePath}"  class="card-img-top" alt="Course Image">
+                        <img th:src="${minioUrl}+'/'+${bucketName}+'/'+${course.courseImageFilePath}"
+                             class="card-img-top" alt="Course Image">
                         <div class="card-body d-flex flex-column">
                             <h5 class="card-title" th:text="${course.title}">Course Title</h5>
                             <p class="mb-1"><span class="instructor-name"
@@ -179,7 +164,7 @@
                             <div class="d-flex justify-content-between mb-2">
                                     <span class="students-count">
                                         <i class="fas fa-users me-1"></i> <span
-                                            th:text="${course.totalStudent}">1,234</span> students
+                                            th:text="${course.totalStudent}">1,234</span> student(s)
                                     </span>
                                 <span class="course-date">
                                         <i class="far fa-calendar-alt me-1"></i> <span th:text="${course.courseDate}">Jan 2025</span>
@@ -231,6 +216,27 @@
         </div>
     </div>
 </footer>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Auto-submit form when a checkbox is clicked (optional - remove if you prefer using the Apply button)
+        /*
+        const categoryCheckboxes = document.querySelectorAll('.category-checkbox');
+        categoryCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                document.getElementById('categoryFilterForm').submit();
+            });
+        });
+        */
+
+        // Quick filter stats
+        const selectedFilters = document.querySelectorAll('.category-checkbox:checked').length;
+        if (selectedFilters > 0) {
+            const filterTitle = document.querySelector('.filters h5');
+            filterTitle.textContent = `Filter Courses (${selectedFilters} active)`;
+        }
+    });
+</script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 </body>

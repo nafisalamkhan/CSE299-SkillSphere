@@ -20,4 +20,8 @@ public class CourseResponse {
     private String instructor;
     private String courseImageFilePath;
     private List<SectionResponse> sections;
+
+    // for logged-in user
+    private Integer totalVideos;
+    private Integer watchedVideos;
 }

@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${course.title} + ' | Learning Platform'">Course Content | Learning Platform</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-width: 350px;
+        }
+
+        body {
+            overflow-x: hidden;
+        }
+
+        .navbar-learning {
+            background-color: #1c1d1f;
+        }
+
+        .course-sidebar {
+            width: var(--sidebar-width);
+            height: calc(100vh - 56px);
+            position: fixed;
+            right: 0;
+            top: 56px;
+            background-color: #ffffff;
+            border-left: 1px solid #e3e6f0;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar-collapsed .course-sidebar {
+            transform: translateX(var(--sidebar-width));
+        }
+
+        .content-container {
+            margin-right: var(--sidebar-width);
+            transition: margin 0.3s ease;
+        }
+
+        .sidebar-collapsed .content-container {
+            margin-right: 0;
+        }
+
+        .video-container {
+            background-color: #000;
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            height: 0;
+            overflow: hidden;
+            max-width: 100%;
+        }
+
+        .video-container video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .course-section {
+            border-bottom: 1px solid #e3e6f0;
+        }
+
+        .section-header {
+            cursor: pointer;
+            padding: 15px;
+            background-color: #f8f9fc;
+        }
+
+        .section-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .section-expanded .section-content {
+            max-height: 1000px;
+        }
+
+        .video-item {
+            padding: 10px 15px 10px 30px;
+            cursor: pointer;
+            border-bottom: 1px solid #f2f2f2;
+            transition: background-color 0.2s;
+        }
+
+        .video-item:hover {
+            background-color: #f8f9fc;
+        }
+
+        .video-item.active {
+            background-color: #e7f1ff;
+            border-left: 4px solid #5624d0;
+            padding-left: 26px;
+        }
+
+        .video-item .watched-icon {
+            color: #28a745;
+            margin-right: 10px;
+        }
+
+        .video-item:not(.watched) .watched-icon {
+            visibility: hidden;
+        }
+
+        .toggle-sidebar {
+            position: fixed;
+            right: var(--sidebar-width);
+            top: 70px;
+            z-index: 1001;
+            background-color: #5624d0;
+            color: white;
+            border: none;
+            border-radius: 50% 0 0 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: right 0.3s ease;
+        }
+
+        .sidebar-collapsed .toggle-sidebar {
+            right: 0;
+            border-radius: 50% 0 0 50%;
+        }
+
+        .video-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .video-description {
+            color: #6c757d;
+        }
+
+        .progress-container {
+            padding: 15px;
+            border-bottom: 1px solid #e3e6f0;
+        }
+
+        .progress {
+            height: 8px;
+        }
+
+        .nav-buttons {
+            padding: 15px;
+            background-color: #f8f9fc;
+        }
+
+        .nav-btn {
+            background-color: #5624d0;
+            border-color: #5624d0;
+        }
+
+        .nav-btn:hover {
+            background-color: #4b1fa8;
+            border-color: #4b1fa8;
+        }
+
+        .nav-btn.disabled {
+            background-color: #e9ecef;
+            border-color: #dee2e6;
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .sidebar-header {
+            background-color: #f8f9fc;
+            padding: 15px;
+            font-weight: 600;
+            border-bottom: 1px solid #e3e6f0;
+        }
+
+        .course-info {
+            padding: 15px;
+        }
+
+        .course-notes textarea {
+            resize: vertical;
+        }
+
+        @media (max-width: 992px) {
+            .course-sidebar {
+                width: 100%;
+                transform: translateX(100%);
+            }
+
+            .sidebar-collapsed .course-sidebar {
+                transform: translateX(100%);
+            }
+
+            .content-container {
+                margin-right: 0;
+            }
+
+            .toggle-sidebar {
+                right: 0;
+            }
+        }
+    </style>
+</head>
+<body class="sidebar-collapsed">
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark navbar-learning">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/user/courses">Learning Platform</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/user/courses">Courses</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/user/courses/my-courses">My Learning</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/user/courses/{id}(id=${course.courseId})}">
+                        <i class="fas fa-info-circle"></i> Course Details
+                    </a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                       data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle"></i> <span sec:authentication="name">Username</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="/user/profile">Profile</a></li>
+                        <li><a class="dropdown-item" href="/user/settings">Settings</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li>
+                            <form th:action="@{/logout}" method="post">
+                                <button class="dropdown-item" type="submit">Logout</button>
+                            </form>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="content-container">
+    <!-- Video Player Section -->
+    <div class="video-player-section">
+        <div class="video-container">
+            <video
+                    th:if="${currentVideo != null}"
+                    id="course-video"
+                    controls
+                    autoplay
+                    th:src="${minioUrl}+'/'+${bucketName}+'/'+${currentVideo.filePath}">
+                Your browser does not support the video tag.
+            </video>
+            <div th:if="${currentVideo == null}" class="text-center p-5">
+                <i class="fas fa-exclamation-circle fa-3x text-muted mb-3"></i>
+                <h3>No video available</h3>
+                <p>This course doesn't have any videos yet.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Content Information -->
+    <div class="container py-4">
+        <div class="row">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a th:href="@{/user/courses/my-courses}">My Courses</a></li>
+                        <li class="breadcrumb-item"><a th:href="@{/user/courses/{id}(id=${course.courseId})}"
+                                                       th:text="${course.title}">Course Title</a></li>
+                        <li class="breadcrumb-item active" aria-current="page"
+                            th:text="${currentVideo != null ? currentVideo.title : 'No Video'}">Video Title
+                        </li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+
+        <div class="row" th:if="${currentVideo != null}">
+            <div class="col-12">
+                <h1 class="video-title" th:text="${currentVideo.title}">Video Title</h1>
+                <p class="video-description" th:text="${currentVideo.description}">Video description goes here.</p>
+
+                <div class="mt-4 mb-3">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <!-- Previous button -->
+                            <a th:if="${navInfo.previousVideoId != null}"
+                               th:href="@{/user/courses/{courseId}/content(courseId=${course.courseId},videoId=${navInfo.previousVideoId})}"
+                               class="btn btn-outline-primary me-2">
+                                <i class="fas fa-arrow-left"></i> Previous
+                            </a>
+                            <button th:if="${navInfo.previousVideoId == null}"
+                                    class="btn btn-outline-secondary me-2" disabled>
+                                <i class="fas fa-arrow-left"></i> Previous
+                            </button>
+
+                            <!-- Next button -->
+                            <a th:if="${navInfo.nextVideoId != null}"
+                               th:href="@{/user/courses/{courseId}/content(courseId=${course.courseId},videoId=${navInfo.nextVideoId})}"
+                               class="btn btn-primary nav-btn">
+                                Next <i class="fas fa-arrow-right"></i>
+                            </a>
+                            <button th:if="${navInfo.nextVideoId == null}"
+                                    class="btn btn-secondary" disabled>
+                                Next <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+
+                        <div>
+                            <button class="btn btn-outline-secondary" id="markAsWatched">
+                                <i class="fas fa-check-circle"></i> Mark as Watched
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notes Section -->
+                <div class="card mt-4">
+                    <div class="card-header bg-light">
+                        <i class="fas fa-sticky-note"></i> Notes
+                    </div>
+                    <div class="card-body">
+                        <textarea class="form-control" rows="4"
+                                  placeholder="Add your notes for this video..."></textarea>
+                        <div class="mt-2 text-end">
+                            <button class="btn btn-primary btn-sm">Save Notes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Course Content Sidebar -->
+<button class="toggle-sidebar" id="toggleSidebar">
+    <i class="fas fa-chevron-left"></i>
+</button>
+
+<div class="course-sidebar">
+    <div class="sidebar-header d-flex justify-content-between align-items-center">
+        <div>Course Content</div>
+        <div>
+                <span class="badge bg-primary"
+                      th:text="${progress != null ? progress.progressPercentage + '% Complete' : '0% Complete'}">
+                    0% Complete
+                </span>
+        </div>
+    </div>
+
+    <div class="progress-container">
+        <div class="progress mb-2">
+            <div class="progress-bar bg-success" role="progressbar"
+                 th:style="'width: ' + ${progress != null ? progress.progressPercentage : 0} + '%'"
+                 th:aria-valuenow="${progress != null ? progress.progressPercentage : 0}"
+                 aria-valuemin="0" aria-valuemax="100">
+            </div>
+        </div>
+        <div class="d-flex justify-content-between">
+                <span class="small" th:text="${progress != null ? progress.watchedVideos : 0} + '/' +
+                    ${progress != null ? progress.totalVideos : 0} + ' videos watched'">
+                    0/0 videos watched
+                </span>
+            <span class="small" th:if="${progress != null && progress.lastAccessedDate != null}"
+                  th:text="'Last accessed: ' + ${progress.lastAccessedDate}">
+                    Last accessed: Never
+                </span>
+        </div>
+    </div>
+
+    <!-- Course Sections -->
+    <div class="course-sections">
+        <div th:each="section, sectionStat : ${course.sections}" class="course-section"
+             th:classappend="${sectionStat.index == currentSectionIndex ? 'section-expanded' : ''}">
+            <div class="section-header d-flex justify-content-between"
+                 th:data-section="${sectionStat.index}">
+                <div>
+                    <span class="section-title" th:text="${section.title}">Section Title</span>
+                    <div class="small text-muted" th:text="${section.videos.size()} + ' lecture(s)'">0 lectures</div>
+                </div>
+                <div>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+            </div>
+            <div class="section-content">
+                <div th:each="video, videoStat : ${section.videos}"
+                     class="video-item"
+                     th:classappend="${sectionStat.index == currentSectionIndex && videoStat.index == currentVideoIndex ? 'active' : ''} +
+                        ${progress != null && progress.watchedVideoIds != null && progress.watchedVideoIds.contains(video.id) ? ' watched' : ''}">
+                    <a th:href="@{/user/courses/{courseId}/content(courseId=${course.courseId},videoId=${video.id})}"
+                       class="text-decoration-none text-dark d-flex align-items-center">
+                            <span class="watched-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </span>
+                        <div>
+                            <div th:text="${video.title}">Video Title</div>
+                            <div class="small text-muted">
+                                <i class="fas fa-video me-1"></i>
+                                <span>10:30</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Toggle sidebar
+        const toggleBtn = document.getElementById('toggleSidebar');
+        const body = document.body;
+
+        toggleBtn.addEventListener('click', function () {
+            body.classList.toggle('sidebar-collapsed');
+            const icon = toggleBtn.querySelector('i');
+            if (body.classList.contains('sidebar-collapsed')) {
+                icon.classList.remove('fa-chevron-left');
+                icon.classList.add('fa-chevron-right');
+            } else {
+                icon.classList.remove('fa-chevron-right');
+                icon.classList.add('fa-chevron-left');
+            }
+        });
+
+        // Toggle sections
+        const sectionHeaders = document.querySelectorAll('.section-header');
+
+        sectionHeaders.forEach(header => {
+            header.addEventListener('click', function () {
+                const section = this.parentElement;
+                const isExpanded = section.classList.contains('section-expanded');
+
+                // Close all sections first
+                document.querySelectorAll('.course-section').forEach(s => {
+                    s.classList.remove('section-expanded');
+                    s.querySelector('.section-header i').classList.remove('fa-chevron-up');
+                    s.querySelector('.section-header i').classList.add('fa-chevron-down');
+                });
+
+                // If the clicked section wasn't expanded, expand it
+                if (!isExpanded) {
+                    section.classList.add('section-expanded');
+                    this.querySelector('i').classList.remove('fa-chevron-down');
+                    this.querySelector('i').classList.add('fa-chevron-up');
+                }
+            });
+        });
+
+        // Mark video as watched
+        const markAsWatchedBtn = document.getElementById('markAsWatched');
+        if (markAsWatchedBtn) {
+            markAsWatchedBtn.addEventListener('click', function () {
+                const courseId = /*[[${course.courseId}]]*/ 0;
+                const videoId = /*[[${currentVideo != null ? currentVideo.id : null}]]*/ 0;
+
+                if (videoId) {
+                    fetch(`/enrollment/${courseId}/videos/${videoId}/watch`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').getAttribute('content')
+                        }
+                    })
+                        .then(response => {
+                            if (response.ok) {
+                                // Update UI to show video is watched
+                                const activeVideo = document.querySelector('.video-item.active');
+                                if (activeVideo) {
+                                    activeVideo.classList.add('watched');
+                                }
+
+                                // Update progress
+                                const progressBar = document.querySelector('.progress-bar');
+                                const watchedCount = document.querySelector('.progress-container .small');
+
+                                // This is a simple update - for a proper update, you might want to reload the page
+                                // or implement a more sophisticated update mechanism
+                                alert('Video marked as watched!');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error marking video as watched:', error);
+                        });
+                }
+            });
+        }
+
+        // Auto-mark video as watched when played
+        const videoElement = document.getElementById('course-video');
+        if (videoElement) {
+            videoElement.addEventListener('ended', function () {
+                if (markAsWatchedBtn) {
+                    markAsWatchedBtn.click();
+                }
+            });
+        }
+    });
+</script>
+
+<script th:inline="javascript">
+
+    // Add this to the script section of the course-content.html page
+    document.addEventListener('DOMContentLoaded', function () {
+        // Video progress tracking
+        const videoElement = document.getElementById('course-video');
+        const courseId = /*[[${course.courseId}]]*/ null;
+        const videoId = /*[[${currentVideo != null ? currentVideo.id : null}]]*/ null;
+        let progressUpdateInterval;
+
+        if (videoElement && videoId) {
+            // Track when video starts playing
+            videoElement.addEventListener('play', function () {
+                // Start interval to update progress every 5 seconds during playback
+                progressUpdateInterval = setInterval(updateVideoProgress, 5000);
+            });
+
+            // Track when video is paused
+            videoElement.addEventListener('pause', function () {
+                // Clear the interval when video is paused
+                clearInterval(progressUpdateInterval);
+                // Update progress one last time
+                updateVideoProgress();
+            });
+
+            // Track when video ends
+            videoElement.addEventListener('ended', function () {
+                clearInterval(progressUpdateInterval);
+                // Mark as fully watched
+                markVideoWatched();
+            });
+
+            // Track when user leaves the page
+            window.addEventListener('beforeunload', function () {
+                clearInterval(progressUpdateInterval);
+                // Update progress one last time before leaving
+                updateVideoProgress();
+            });
+
+            // Function to update video progress
+            function updateVideoProgress() {
+                if (!videoElement.paused) {
+                    const currentPosition = Math.floor(videoElement.currentTime);
+                    const duration = Math.floor(videoElement.duration);
+
+                    // Only send update if we have valid values
+                    if (!isNaN(currentPosition) && !isNaN(duration) && duration > 0) {
+                        fetch(`/enrollment/${courseId}/videos/${videoId}/progress?position=${currentPosition}&duration=${duration}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            }
+                        }).catch(error => {
+                            console.error('Error updating video progress:', error);
+                        });
+
+                        // If progress is over 90%, mark as watched in UI
+                        if ((currentPosition / duration) >= 0.9) {
+                            const activeVideo = document.querySelector('.video-item.active');
+                            if (activeVideo && !activeVideo.classList.contains('watched')) {
+                                activeVideo.classList.add('watched');
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Function to mark video as watched
+            function markVideoWatched() {
+                fetch(`/enrollment/${courseId}/videos/${videoId}/watch`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            // Update UI to show video is watched
+                            const activeVideo = document.querySelector('.video-item.active');
+                            if (activeVideo) {
+                                activeVideo.classList.add('watched');
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error marking video as watched:', error);
+                    });
+            }
+
+            // Update the mark as watched button
+            const markAsWatchedBtn = document.getElementById('markAsWatched');
+            if (markAsWatchedBtn) {
+                markAsWatchedBtn.addEventListener('click', markVideoWatched);
+            }
+
+            // Try to resume video from last position
+            fetch(`/user/courses/${courseId}/videos/${videoId}/progress`)
+                .then(response => response.json())
+                .then(data => {
+
+                    console.log('data: ', data);
+
+                    if (data && data.currentPositionSeconds) {
+                        // Set video current time to last saved position
+                        // Only if it's not near the end of the video
+                        videoElement.currentTime = data.currentPositionSeconds;
+                        /*const duration = videoElement.duration;
+                        if (!isNaN(duration) && data.currentPositionSeconds < (duration * 0.9)) {
+                            videoElement.currentTime = data.currentPositionSeconds;
+                        }*/
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading video progress:', error);
+                });
+        }
+
+        // Add reset progress button functionality
+        const resetProgressBtn = document.getElementById('resetProgressBtn');
+        if (resetProgressBtn) {
+            resetProgressBtn.addEventListener('click', function () {
+                if (confirm('Are you sure you want to reset all progress for this course? This cannot be undone.')) {
+                    fetch(`/enrollment/${courseId}/reset-progress`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                        .then(response => {
+                            if (response.ok) {
+                                // Reload the page to refresh progress
+                                window.location.reload();
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error resetting progress:', error);
+                        });
+                }
+            });
+        }
+    });
+
+</script>
+</body>
+</html>

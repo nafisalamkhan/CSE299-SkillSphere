@@ -27,6 +27,7 @@ public class CourseService {
     private final MinIOService minIOService;
     private final EnrollmentRepository enrollmentRepository;
     private final AuthUtils authUtils;
+    private final Mapper mapper;
 
     @Transactional(rollbackFor = Exception.class)
     public Course createCourse(CourseRequest request) {
@@ -145,44 +146,8 @@ public class CourseService {
     public List<CourseResponse> getCoursesForLoggedInInstructor() {
         User instructor = getLoggedInUser();
         return courseRepository.findAllByInstructorId(instructor.getId()).stream()
-                .map(this::mapToCourseResponse)
+                .map(mapper::mapToCourseResponse)
                 .toList();
-    }
-
-    private CourseResponse getCourseResponse(Course c) {
-        CourseResponse response = new CourseResponse();
-        response.setCourseId(c.getCourseId());
-        response.setTitle(c.getTitle());
-        response.setCategory(c.getCategory().getName());
-        response.setInstructor(c.getInstructor().getName());
-        response.setCourseDate(c.getCourseDate());
-        response.setTotalStudent(c.getStudents().size());
-        response.setCourseImageFilePath(c.getCourseImageFilePath());
-
-        List<SectionResponse> sectionResponses = sectionRepository.findAllByCourseCourseId(c.getCourseId()).stream()
-                .map(s -> {
-                    SectionResponse sectionResponse = new SectionResponse();
-                    sectionResponse.setTitle(s.getTitle());
-                    sectionResponse.setDescription(s.getDescription());
-
-                    List<VideoResponse> videos = videoRepository.findAllBySectionId(s.getId()).stream()
-                            .map(v -> {
-                                VideoResponse videoResponse = new VideoResponse();
-                                videoResponse.setTitle(v.getTitle());
-                                videoResponse.setDescription(v.getDescription());
-                                videoResponse.setFileName(v.getFileName());
-                                videoResponse.setFileType(v.getFileType());
-                                videoResponse.setBase64(v.getVideoBase64());
-                                videoResponse.setFilePath(v.getFilePath());
-                                return videoResponse;
-                            }).toList();
-
-                    sectionResponse.setVideos(videos);
-                    return sectionResponse;
-                }).toList();
-
-        response.setSections(sectionResponses);
-        return response;
     }
 
     /**
@@ -395,55 +360,33 @@ public class CourseService {
 
     public List<CourseResponse> getAllCoursesForUser() {
         return courseRepository.findAll().stream()
-                .map(this::mapToCourseResponse)
+                .map(mapper::mapToCourseResponse)
                 .toList();
-    }
-
-    private CourseResponse mapToCourseResponse(Course course) {
-        return CourseResponse.builder()
-                .courseId(course.getCourseId())
-                .courseDate(course.getCourseDate())
-                .title(course.getTitle())
-                .category(course.getCategory().getName())
-                .instructor(course.getInstructor().getName())
-                .courseImageFilePath(course.getCourseImageFilePath())
-                .sections(sectionRepository
-                        .findAllByCourseCourseId(course.getCourseId()).stream()
-                        .map(this::mapToSectionResponse).toList())
-                .totalStudent(course.getStudents().size())
-                .build();
-    }
-
-    private SectionResponse mapToSectionResponse(Section section) {
-        return SectionResponse.builder()
-                .title(section.getTitle())
-                .description(section.getDescription())
-                .videos(videoRepository
-                        .findAllBySectionId(section.getId()).stream()
-                        .map(this::mapToVideoResponse).toList())
-                .build();
-    }
-
-    private VideoResponse mapToVideoResponse(Video video) {
-        return VideoResponse.builder()
-                .title(video.getTitle())
-                .filePath(video.getFilePath())
-                .description(video.getDescription())
-                .fileName(video.getFileName())
-                .fileType(video.getFileType())
-                .build();
     }
 
     public CourseResponse getCourseById(Integer courseId) {
         return courseRepository
                 .findById(courseId)
-                .map(this::mapToCourseResponse)
+                .map(mapper::mapToCourseResponse)
                 .orElseThrow(() -> new RuntimeException("Course not found!"));
     }
 
     public List<CourseResponse> getEnrolledCourses() {
         return enrollmentRepository
                 .findAllCoursesByStudentId(authUtils.getLoggedInUser().getId()).stream()
-                .map(this::mapToCourseResponse).toList();
+                .map(mapper::mapToCourseResponse).toList();
+    }
+
+    public List<CourseResponse> getCoursesByCategoryIds(List<Integer> categoryIds) {
+        return courseRepository.findAllByCategoryCategoryIdIn(categoryIds).stream()
+                .map(mapper::mapToCourseResponse)
+                .toList();
+    }
+
+    public List<CourseResponse> getEnrolledCoursesByCategory(Integer categoryId) {
+        return enrollmentRepository
+                .findAllCoursesByStudentIdAndCategoryId(authUtils.getLoggedInUser().getId(), categoryId).stream()
+                .map(mapper::mapToCourseResponse)
+                .toList();
     }
 }
