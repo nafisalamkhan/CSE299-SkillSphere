@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillSphere - Explore Courses</title>
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            line-height: 1.6;
+            color: #333;
+        }
+
+        /* Header & Navigation */
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .nav-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0056D2;
+            text-decoration: none;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-link:hover {
+            color: #0056D2;
+        }
+
+        .search-bar {
+            flex-grow: 1;
+            margin: 0 40px;
+            position: relative;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 1px solid #ddd;
+            border-radius: 50px;
+            font-size: 16px;
+            background: #f7f9fa;
+        }
+
+        .search-bar button {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            color: #666;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #0056D2;
+            color: #0056D2;
+        }
+
+        .btn-outline:hover {
+            background: #f0f7ff;
+        }
+
+        .btn-primary {
+            background: #0056D2;
+            border: 1px solid #0056D2;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #003e9a;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            background-color: #f7f9fa;
+            padding: 15px 0;
+            border-bottom: 1px solid #e8e9eb;
+        }
+
+        .breadcrumb-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .breadcrumb-item {
+            text-decoration: none;
+            color: #6a6f73;
+            font-size: 14px;
+        }
+
+        .breadcrumb-item:hover {
+            color: #0056D2;
+        }
+
+        .breadcrumb-separator {
+            margin: 0 10px;
+            color: #6a6f73;
+        }
+
+        .breadcrumb-active {
+            color: #1c1d1f;
+            font-weight: 500;
+        }
+
+        /* Page Title */
+        .page-title {
+            padding: 30px 0;
+            background-color: #f7f9fa;
+            border-bottom: 1px solid #e8e9eb;
+        }
+
+        .page-title h1 {
+            font-size: 32px;
+            color: #1c1d1f;
+            margin-bottom: 10px;
+        }
+
+        .page-title p {
+            color: #6a6f73;
+            font-size: 16px;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: flex;
+            padding: 40px 0;
+        }
+
+        /* Filters */
+        .filters {
+            width: 260px;
+            padding-right: 30px;
+        }
+
+        .filter-section {
+            margin-bottom: 25px;
+        }
+
+        .filter-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #1c1d1f;
+        }
+
+        .filter-options {
+            list-style: none;
+        }
+
+        .filter-option {
+            margin-bottom: 10px;
+        }
+
+        .filter-checkbox {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .filter-checkbox input {
+            margin-right: 10px;
+        }
+
+        .filter-checkbox label {
+            color: #6a6f73;
+            font-size: 14px;
+        }
+
+        .filter-rating {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+
+        .rating-stars {
+            color: #eb8a2f;
+            font-size: 14px;
+            margin-right: 5px;
+        }
+
+        .filter-rating span {
+            color: #6a6f73;
+            font-size: 14px;
+        }
+
+        .filter-divider {
+            height: 1px;
+            background-color: #e8e9eb;
+            margin: 20px 0;
+        }
+
+        /* Courses Section */
+        .courses-section {
+            flex-grow: 1;
+        }
+
+        .sort-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .sort-select {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #1c1d1f;
+            background-color: white;
+        }
+
+        .results-count {
+            color: #6a6f73;
+            font-size: 14px;
+        }
+
+        .course-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+        }
+
+        .course-card {
+            background: white;
+            border: 1px solid #e8e9eb;
+            border-radius: 4px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .course-image {
+            height: 160px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .course-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .course-details {
+            padding: 15px;
+        }
+
+        .course-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1c1d1f;
+            line-height: 1.4;
+        }
+
+        .course-instructor {
+            font-size: 13px;
+            color: #6a6f73;
+            margin-bottom: 5px;
+        }
+
+        .course-rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 5px;
+        }
+
+        .course-rating .rating-value {
+            font-weight: 600;
+            color: #b4690e;
+        }
+
+        .course-rating .students-count {
+            color: #6a6f73;
+            font-size: 13px;
+        }
+
+        .course-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #6a6f73;
+            margin-bottom: 8px;
+        }
+
+        .course-category {
+            display: inline-block;
+            padding: 2px 8px;
+            background-color: #f7f9fa;
+            border-radius: 3px;
+            font-size: 12px;
+            color: #6a6f73;
+            margin-bottom: 8px;
+        }
+
+        .course-videos {
+            font-size: 13px;
+            color: #6a6f73;
+        }
+
+        .course-progress {
+            margin-top: 10px;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background-color: #e8e9eb;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-filled {
+            height: 100%;
+            background-color: #0056D2;
+        }
+
+        .progress-text {
+            font-size: 12px;
+            color: #6a6f73;
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        .page-item {
+            margin: 0 5px;
+        }
+
+        .page-link {
+            display: block;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            color: #0056D2;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .page-link:hover {
+            background-color: #f0f7ff;
+        }
+
+        .page-item.active .page-link {
+            background-color: #0056D2;
+            color: white;
+            border-color: #0056D2;
+        }
+
+        /* Footer */
+        footer {
+            background: #1c1d1f;
+            color: white;
+            padding: 60px 0 20px;
+        }
+
+        .footer-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-col h4 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+
+        .footer-links a {
+            color: #ddd;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            padding-top: 20px;
+            border-top: 1px solid #444;
+            text-align: center;
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .main-content {
+                flex-direction: column;
+            }
+
+            .filters {
+                width: 100%;
+                margin-bottom: 30px;
+                padding-right: 0;
+            }
+
+            .course-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .footer-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .search-bar {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .course-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .nav-menu {
+                display: none;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .course-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Header and Navigation -->
+<header>
+    <div class="container">
+        <div class="nav-container">
+            <a href="#" class="logo">SkillSphere</a>
+
+            <div class="search-bar">
+                <input type="text" placeholder="Search for anything">
+                <button>🔍</button>
+            </div>
+
+            <div class="nav-menu">
+                <a href="#" class="nav-link">Categories</a>
+                <a href="#" class="nav-link">Teach on SkillSphere</a>
+            </div>
+
+            <div class="auth-buttons">
+                <button class="btn btn-outline">Log in</button>
+                <button class="btn btn-primary">Sign up</button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Breadcrumb -->
+<div class="breadcrumb">
+    <div class="container">
+        <div class="breadcrumb-container">
+            <a href="#" class="breadcrumb-item">Home</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-item breadcrumb-active">Explore Courses</span>
+        </div>
+    </div>
+</div>
+
+<!-- Page Title -->
+<section class="page-title">
+    <div class="container">
+        <h1>Explore Our Course Library</h1>
+        <p>Discover thousands of courses to advance your skills and career</p>
+    </div>
+</section>
+
+<!-- Main Content -->
+<section class="main-content">
+    <div class="container">
+        <div class="main-content">
+            <!-- Filters Column -->
+            <div class="filters">
+                <div class="filter-section">
+                    <h3 class="filter-title">Categories</h3>
+                    <ul class="filter-options">
+                        <li class="filter-option" th:each="category : ${categories}">
+                            <div class="filter-checkbox">
+                                <input type="checkbox" th:id="'cat_'+${category.categoryId}"
+                                       name="category-programming">
+                                <label th:for="'cat_'+${category.categoryId}" th:text="${category.name}"></label>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="filter-divider"></div>
+
+                <div class="filter-section">
+                    <h3 class="filter-title">Ratings</h3>
+                    <div class="filter-options">
+                        <div class="filter-rating">
+                            <input type="radio" id="rating-all" name="rating" checked>
+                            <label for="rating-all">All ratings</label>
+                        </div>
+                        <div class="filter-rating">
+                            <input type="radio" id="rating-4plus" name="rating">
+                            <label for="rating-4plus">
+                                <span class="rating-stars">★★★★</span> 4.0 & up
+                            </label>
+                        </div>
+                        <div class="filter-rating">
+                            <input type="radio" id="rating-3plus" name="rating">
+                            <label for="rating-3plus">
+                                <span class="rating-stars">★★★</span> 3.0 & up
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-divider"></div>
+
+                <div class="filter-section">
+                    <h3 class="filter-title">Level</h3>
+                        <ul class="filter-options">
+                            <li class="filter-option">
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="level-beginner" name="level-beginner">
+                                    <label for="level-beginner">Beginner</label>
+                                </div>
+                            </li>
+                            <li class="filter-option">
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="level-intermediate" name="level-intermediate">
+                                    <label for="level-intermediate">Intermediate</label>
+                                </div>
+                            </li>
+                            <li class="filter-option">
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="level-advanced" name="level-advanced">
+                                    <label for="level-advanced">Advanced</label>
+                                </div>
+                            </li>
+                        </ul>
+                </div>
+            </div>
+
+            <!-- Courses Column -->
+            <div class="courses-section">
+                <div class="sort-options">
+                    <select class="sort-select">
+                        <option value="most-popular">Most Popular</option>
+                        <option value="highest-rated">Highest Rated</option>
+                        <option value="newest">Newest</option>
+                    </select>
+                    <!--<div class="results-count">Showing 1-12 of 156 courses</div>-->
+                </div>
+
+                <div class="course-grid">
+                    <!-- Course Card 1 -->
+                    <a style="text-decoration: none"
+                       class="course-card" th:each="course:${courses}"
+                       th:href="'login?next=%2Fuser%2Fcourses%2F'+${course.courseId}">
+                        <div class="course-image">
+                            <img th:src="${minioUrl} + '/'+ ${bucketName}+'/'+${course.courseImageFilePath}"
+                                 th:alt="${course.title}">
+                        </div>
+                        <div class="course-details">
+                            <div class="course-category" th:text="${course.category}">Category</div>
+                            <h3 class="course-title" th:text="${course.title}">Title</h3>
+                            <p class="course-instructor" th:text="${course.instructor}">Instructor</p>
+                            <div class="course-rating">
+                                <span class="rating-stars">★★★★★</span>
+                                <span class="rating-value">4.8</span>
+                                <span class="students-count" th:text="'('+${course.totalStudent}+')'">(0)</span>
+                            </div>
+                            <div class="course-meta">
+                                <span th:text="${course.totalVideos} + ' video(s)'">0 videos</span>
+                                <span th:text="'Level'">Beginner Level</span>
+                            </div>
+                            <!--<div class="course-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-filled" style="width: 60%;"></div>
+                                </div>
+                                <div class="progress-text">25/42 completed</div>
+                            </div>-->
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Pagination -->
+                <!--<div class="pagination">
+                    <div class="page-item active"><a href="#" class="page-link">1</a></div>
+                    <div class="page-item"><a href="#" class="page-link">2</a></div>
+                    <div class="page-item"><a href="#" class="page-link">3</a></div>
+                    <div class="page-item"><a href="#" class="page-link">4</a></div>
+                    <div class="page-item"><a href="#" class="page-link">Next</a></div>
+                </div>-->
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="footer-container">
+            <div class="footer-col">
+                <h4>SkillSphere</h4>
+                <ul class="footer-links">
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Blog</a></li>
+                    <li><a href="#">Careers</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4>Learn</h4>
+                <ul class="footer-links">
+                    <li><a href="#">All Courses</a></li>
+                    <li><a href="#">Categories</a></li>
+                    <li><a href="#">Free Courses</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4>Teach</h4>
+                <ul class="footer-links">
+                    <li><a href="#">Become an Instructor</a></li>
+                    <li><a href="#">Instructor Guidelines</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4>Support</h4>
+                <ul class="footer-links">
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">Contact Us</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 SkillSphere. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+</body>
+</html>

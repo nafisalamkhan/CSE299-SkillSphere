@@ -6,8 +6,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 @Component
 public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
@@ -24,7 +27,12 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
             redirectUrl = "/courses";  // Redirect to admin dashboard
         } else if (authentication.getAuthorities().stream()
                 .anyMatch(role -> role.getAuthority().equals("ROLE_USER"))) {
-            redirectUrl = "/"; // Redirect to user home page
+            String next = request.getParameter("next");
+            if (StringUtils.hasText(next)) {
+                redirectUrl = URLDecoder.decode(next, StandardCharsets.UTF_8);
+            } else {
+                redirectUrl = "/user/courses";
+            }
         }
 
         getRedirectStrategy().sendRedirect(request, response, redirectUrl);

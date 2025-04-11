@@ -22,12 +22,17 @@ public class WebSecurityConfig {
     private final AuthenticationFailureHandler customAuthenticationFailureHandler;
     private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 
+    private static final String[] whitelisted = new String[]{
+            "/register", "/login", "/", "/static/css/**", "/static/js/**",
+            "/explore"
+    };
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/register", "/login", "/static/css/**", "/static/js/**").permitAll()
+                        .requestMatchers(whitelisted).permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

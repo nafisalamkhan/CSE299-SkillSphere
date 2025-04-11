@@ -102,6 +102,7 @@
 <div class="login-container" id="login">
     <h2>Login</h2>
     <form id="loginForm" th:action="@{/login}" method="post">
+        <input type="hidden" name="next" th:value="${next}">
         <label for="username">Username</label>
         <input type="text" id="username" name="username" placeholder="Enter username" required/><br/>
 
