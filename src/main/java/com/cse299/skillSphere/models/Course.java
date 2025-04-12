@@ -33,6 +33,8 @@ public class Course {
     @JoinColumn(name = "InstructorID")
     private User instructor;
 
+    private String level; // Beginner, Intermediate, Advanced
+
     @ManyToMany
     @JoinTable(name = "course_students",
             joinColumns = @JoinColumn(name = "CourseID"),

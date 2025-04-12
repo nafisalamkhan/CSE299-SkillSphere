@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Skillsphere - Expand Your Knowledge</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         /* Reset and Base Styles */
         * {
@@ -467,6 +468,12 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        .course-rating .fa {
+            color: gold;
+            font-size: 18px;
+        }
+
     </style>
 </head>
 <body>
@@ -476,19 +483,19 @@
         <div class="nav-container">
             <a href="#" class="logo">SkillSphere</a>
 
-            <div class="search-bar">
+            <!--<div class="search-bar">
                 <input type="text" placeholder="Search for anything">
                 <button>🔍</button>
-            </div>
+            </div>-->
 
             <div class="nav-menu">
-                <a href="#" class="nav-link">Categories</a>
-                <a href="#" class="nav-link">Teach on SkillSphere</a>
+                <!--<a href="#" class="nav-link">Categories</a>-->
+                <!--                <a href="/register" class="nav-link">Teach on SkillSphere </a>-->
             </div>
 
             <div class="auth-buttons">
-                <button class="btn btn-outline">Log in</button>
-                <button class="btn btn-primary">Sign up</button>
+                <a style="text-decoration: none" class="btn btn-outline" href="/login">Log in</a>
+                <a style="text-decoration: none" class="btn btn-primary" href="/register">Sign up</a>
             </div>
         </div>
     </div>
@@ -550,75 +557,34 @@
         <h2 class="section-title">Most Popular Courses</h2>
         <div class="courses-grid">
             <!-- Sample Course Cards -->
-            <div class="course-card">
+            <div class="course-card" th:each="course:${courses}">
                 <div class="course-image">
-                    <img src="/api/placeholder/300/200" alt="Java Programming Course">
+                    <img th:src="${minioUrl}+'/'+${bucketName}+'/'+${course.courseImageFilePath}"
+                         th:alt="${course.title}">
                 </div>
                 <div class="course-details">
-                    <h3 class="course-title">Complete Java Masterclass</h3>
-                    <p class="course-instructor">Sarah Johnson</p>
-                    <div class="course-rating">
+                    <h3 class="course-title" th:text="${course.title}">Complete Java Masterclass</h3>
+                    <p class="course-instructor" th:text="${course.instructor}">Sarah Johnson</p>
+                    <!--<div class="course-rating">
                         <span class="rating-stars">★★★★★</span>
                         <span>4.8 (2,453 students)</span>
-                    </div>
-                    <div class="course-stats">
-                        <span>42 videos</span>
-                        <span>Beginner Level</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="course-card">
-                <div class="course-image">
-                    <img src="/api/placeholder/300/200" alt="Data Science Course">
-                </div>
-                <div class="course-details">
-                    <h3 class="course-title">Data Science: The Complete Guide</h3>
-                    <p class="course-instructor">Michael Chen</p>
+                    </div>-->
                     <div class="course-rating">
-                        <span class="rating-stars">★★★★☆</span>
-                        <span>4.7 (1,890 students)</span>
+                        <!-- Render Stars Dynamically -->
+                        <span class="rating-stars">
+                            <span th:each="i : ${#numbers.sequence(1, 5)}">
+                                <!-- Full Star -->
+                                <i th:if="${course.rating >= i}" class="fa fa-star"></i>
+                                <!-- Half Star -->
+                                <i th:if="${course.rating >= i - 0.5 && course.rating < i}"
+                                   class="fa fa-star-half-o"></i>
+                                <!-- Empty Star -->
+                                <i th:if="${course.rating < i}" class="fa fa-star-o"></i>
+                            </span>
+                        </span>
+                        <span th:text="${course.rating} + ' (' + ${course.ratingStudentCount} + ' students)'"></span>
                     </div>
-                    <div class="course-stats">
-                        <span>38 videos</span>
-                        <span>Intermediate Level</span>
-                    </div>
-                </div>
-            </div>
 
-            <div class="course-card">
-                <div class="course-image">
-                    <img src="/api/placeholder/300/200" alt="Web Development Course">
-                </div>
-                <div class="course-details">
-                    <h3 class="course-title">Modern Web Development Bootcamp</h3>
-                    <p class="course-instructor">David Wilson</p>
-                    <div class="course-rating">
-                        <span class="rating-stars">★★★★★</span>
-                        <span>4.9 (3,217 students)</span>
-                    </div>
-                    <div class="course-stats">
-                        <span>56 videos</span>
-                        <span>All Levels</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="course-card">
-                <div class="course-image">
-                    <img src="/api/placeholder/300/200" alt="Digital Marketing Course">
-                </div>
-                <div class="course-details">
-                    <h3 class="course-title">Digital Marketing Masterclass</h3>
-                    <p class="course-instructor">Emily Rodriguez</p>
-                    <div class="course-rating">
-                        <span class="rating-stars">★★★★☆</span>
-                        <span>4.6 (1,654 students)</span>
-                    </div>
-                    <div class="course-stats">
-                        <span>32 videos</span>
-                        <span>Beginner Level</span>
-                    </div>
                 </div>
             </div>
         </div>
@@ -724,5 +690,7 @@
         </div>
     </div>
 </footer>
+
+
 </body>
 </html>

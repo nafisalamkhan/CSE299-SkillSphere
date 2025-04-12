@@ -126,8 +126,14 @@
             color: #5624d0;
         }
     </style>
+
+    <th:block th:replace="fragments/navbar :: navbar-styles"></th:block>
+
 </head>
 <body>
+
+<div th:replace="/fragments/navbar :: navbar(activeTab='edit-course')"></div>
+
 <div class="container">
     <div class="progress-container">
         <div class="progress-bar" style="width: 50%;"></div>
@@ -165,6 +171,17 @@
                         </option>
                     </select>
                 </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="courseLevel" class="form-label">Course Level</label>
+                    <select class="form-select" id="courseLevel" th:field="*{level}" required>
+                        <option value="">Select a level</option>
+                        <option value="Beginner">Beginner</option>
+                        <option value="Intermediate">Intermediate</option>
+                        <option value="Advanced">Advanced</option>
+                    </select>
+                </div>
+
             </div>
         </div>
 

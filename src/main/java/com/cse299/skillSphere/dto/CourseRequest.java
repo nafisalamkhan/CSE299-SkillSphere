@@ -11,6 +11,7 @@ public class CourseRequest {
     private String title;
     private String courseDate;
     private Integer categoryId;
+    private String level;
     private MultipartFile courseImage;
     private List<SectionRequest> sections;
 }

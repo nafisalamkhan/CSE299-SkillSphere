@@ -20,6 +20,9 @@ public class CourseResponse {
     private String instructor;
     private String courseImageFilePath;
     private Integer totalVideos;
+    private String level;
+    private Double rating;
+    private Integer ratingStudentCount;
     private List<SectionResponse> sections;
 
     // for logged-in user

@@ -4,11 +4,9 @@ import com.cse299.skillSphere.dto.CourseResponse;
 import com.cse299.skillSphere.dto.SectionResponse;
 import com.cse299.skillSphere.dto.VideoResponse;
 import com.cse299.skillSphere.models.*;
-import com.cse299.skillSphere.repositories.EnrollmentRepository;
-import com.cse299.skillSphere.repositories.SectionRepository;
-import com.cse299.skillSphere.repositories.UserVideoProgressRepository;
-import com.cse299.skillSphere.repositories.VideoRepository;
+import com.cse299.skillSphere.repositories.*;
 import com.cse299.skillSphere.utils.AuthUtils;
+import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +21,7 @@ public class Mapper {
     private final AuthUtils authUtils;
     private final UserVideoProgressRepository progressRepository;
     private final EnrollmentRepository enrollmentRepository;
+    private final CourseRatingRepository courseRatingRepository;
 
     public CourseResponse mapToCourseResponse(Course course) {
         long watchedVideos = 0;
@@ -39,6 +38,7 @@ public class Mapper {
                 .map(this::mapToSectionResponse).toList();
 
         int students = enrollmentRepository.countAllStudentsByCourseCourseId(course.getCourseId());
+        Tuple rating = courseRatingRepository.findAverageRating(course.getCourseId());
 
         return CourseResponse.builder()
                 .courseId(course.getCourseId())
@@ -50,6 +50,9 @@ public class Mapper {
                 .sections(sections)
                 .totalStudent(students)
                 .totalVideos(sections.stream().flatMap(s -> s.getVideos().stream()).mapToInt(v -> 1).sum())
+                .level(course.getLevel())
+                .rating(rating.get("rating", Double.class))
+                .ratingStudentCount(rating.get("students", Integer.class))
                 .watchedVideos((int) watchedVideos)
                 .build();
     }

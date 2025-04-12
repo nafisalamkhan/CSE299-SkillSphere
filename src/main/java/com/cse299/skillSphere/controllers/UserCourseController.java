@@ -12,8 +12,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -88,6 +92,8 @@ public class UserCourseController {
         model.addAttribute("instructorImage", authUtils.getLoggedInUser().getProfileImageFilePath());
         model.addAttribute("bucketName", bucketName);
         model.addAttribute("minioUrl", minioUrl);
+
+        model.addAttribute("userRating", courseService.getUserRating(courseId));
 
         return COURSE_DETAILS;
     }
@@ -227,6 +233,20 @@ public class UserCourseController {
                 });
 
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{id}/rate")
+    public String rateCourse(@PathVariable("id") Integer courseId,
+                             @RequestParam("rating") Integer rating,
+                             RedirectAttributes redirectAttributes) {
+        if (!enrollmentService.isUserEnrolled(courseId)) {
+            redirectAttributes.addFlashAttribute("error", "You must be enrolled in the course to rate it");
+            return "redirect:/user/courses/" + courseId;
+        }
+        courseService.saveOrUpdateRating(courseId, rating);
+        redirectAttributes.addAttribute("ratingSuccess", true);
+
+        return "redirect:/user/courses/" + courseId;
     }
 
 }

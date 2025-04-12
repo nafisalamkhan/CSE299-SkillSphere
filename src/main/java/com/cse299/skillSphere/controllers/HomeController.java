@@ -26,6 +26,11 @@ public class HomeController {
 
     @GetMapping({"/", ""})
     public String index(Model model) {
+        List<CourseResponse> popularCourses = courseService.getPopularCourses(4);
+        model.addAttribute("courses", popularCourses);
+        model.addAttribute("bucketName", bucketName);
+        model.addAttribute("minioUrl", minioUrl);
+
         return "home";
     }
 
@@ -38,4 +43,15 @@ public class HomeController {
         model.addAttribute("minioUrl", minioUrl);
         return "explore-courses";
     }
+
+    /*@ResponseBody
+    @GetMapping("/api/courses/filter")
+    public List<CourseResponse> filterCourses(
+            @RequestParam(required = false) List<Integer> categories,
+            @RequestParam(required = false) Double minRating,
+            @RequestParam(required = false) List<String> levels,
+            @RequestParam(required = false) String sortBy) {
+
+        return courseService.filterCourses(categories, minRating, levels, sortBy);
+    }*/
 }

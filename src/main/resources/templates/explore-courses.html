@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SkillSphere - Explore Courses</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
         /* Reset and Base Styles */
         * {
@@ -457,6 +458,43 @@
             font-size: 14px;
         }
 
+        /* Filter buttons */
+        .filter-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .filter-button {
+            padding: 8px 16px;
+            background-color: #0056D2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .filter-button:hover {
+            background-color: #003e9a;
+        }
+
+        .clear-filter {
+            padding: 8px 16px;
+            background-color: #f1f1f1;
+            color: #333;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .clear-filter:hover {
+            background-color: #e1e1e1;
+        }
+
         /* Responsive Design */
         @media (max-width: 992px) {
             .main-content {
@@ -508,21 +546,21 @@
 <header>
     <div class="container">
         <div class="nav-container">
-            <a href="#" class="logo">SkillSphere</a>
+            <a href="/" class="logo">SkillSphere</a>
 
             <div class="search-bar">
-                <input type="text" placeholder="Search for anything">
-                <button>🔍</button>
+                <input type="text" placeholder="Search for anything" id="searchInput">
+                <button onclick="searchCourses()">🔍</button>
             </div>
 
             <div class="nav-menu">
-                <a href="#" class="nav-link">Categories</a>
-                <a href="#" class="nav-link">Teach on SkillSphere</a>
+                <a href="/explore" class="nav-link">Categories</a>
+                <a href="/teach" class="nav-link">Teach on SkillSphere</a>
             </div>
 
             <div class="auth-buttons">
-                <button class="btn btn-outline">Log in</button>
-                <button class="btn btn-primary">Sign up</button>
+                <button class="btn btn-outline" onclick="window.location.href='/login'">Log in</button>
+                <button class="btn btn-primary" onclick="window.location.href='/register'">Sign up</button>
             </div>
         </div>
     </div>
@@ -532,7 +570,7 @@
 <div class="breadcrumb">
     <div class="container">
         <div class="breadcrumb-container">
-            <a href="#" class="breadcrumb-item">Home</a>
+            <a href="/" class="breadcrumb-item">Home</a>
             <span class="breadcrumb-separator">/</span>
             <span class="breadcrumb-item breadcrumb-active">Explore Courses</span>
         </div>
@@ -553,86 +591,97 @@
         <div class="main-content">
             <!-- Filters Column -->
             <div class="filters">
-                <div class="filter-section">
-                    <h3 class="filter-title">Categories</h3>
-                    <ul class="filter-options">
-                        <li class="filter-option" th:each="category : ${categories}">
-                            <div class="filter-checkbox">
-                                <input type="checkbox" th:id="'cat_'+${category.categoryId}"
-                                       name="category-programming">
-                                <label th:for="'cat_'+${category.categoryId}" th:text="${category.name}"></label>
+                <form id="filterForm">
+                    <div class="filter-section">
+                        <h3 class="filter-title">Categories</h3>
+                        <ul class="filter-options">
+                            <li class="filter-option" th:each="category : ${categories}">
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" th:id="'cat_'+${category.categoryId}"
+                                           name="categories" th:value="${category.categoryId}">
+                                    <label th:for="'cat_'+${category.categoryId}" th:text="${category.name}">Category
+                                        Name</label>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="filter-divider"></div>
+
+                    <div class="filter-section">
+                        <h3 class="filter-title">Ratings</h3>
+                        <div class="filter-options">
+                            <div class="filter-rating">
+                                <input type="radio" id="rating-all" name="rating" value="0" checked>
+                                <label for="rating-all">All ratings</label>
                             </div>
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="filter-divider"></div>
-
-                <div class="filter-section">
-                    <h3 class="filter-title">Ratings</h3>
-                    <div class="filter-options">
-                        <div class="filter-rating">
-                            <input type="radio" id="rating-all" name="rating" checked>
-                            <label for="rating-all">All ratings</label>
-                        </div>
-                        <div class="filter-rating">
-                            <input type="radio" id="rating-4plus" name="rating">
-                            <label for="rating-4plus">
-                                <span class="rating-stars">★★★★</span> 4.0 & up
-                            </label>
-                        </div>
-                        <div class="filter-rating">
-                            <input type="radio" id="rating-3plus" name="rating">
-                            <label for="rating-3plus">
-                                <span class="rating-stars">★★★</span> 3.0 & up
-                            </label>
+                            <div class="filter-rating">
+                                <input type="radio" id="rating-4plus" name="rating" value="4">
+                                <label for="rating-4plus">
+                                    <span class="rating-stars">★★★★</span> 4.0 & up
+                                </label>
+                            </div>
+                            <div class="filter-rating">
+                                <input type="radio" id="rating-3plus" name="rating" value="3">
+                                <label for="rating-3plus">
+                                    <span class="rating-stars">★★★</span> 3.0 & up
+                                </label>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="filter-divider"></div>
+                    <div class="filter-divider"></div>
 
-                <div class="filter-section">
-                    <h3 class="filter-title">Level</h3>
+                    <div class="filter-section">
+                        <h3 class="filter-title">Level</h3>
                         <ul class="filter-options">
                             <li class="filter-option">
                                 <div class="filter-checkbox">
-                                    <input type="checkbox" id="level-beginner" name="level-beginner">
+                                    <input type="checkbox" id="level-beginner" name="levels" value="Beginner">
                                     <label for="level-beginner">Beginner</label>
                                 </div>
                             </li>
                             <li class="filter-option">
                                 <div class="filter-checkbox">
-                                    <input type="checkbox" id="level-intermediate" name="level-intermediate">
+                                    <input type="checkbox" id="level-intermediate" name="levels" value="Intermediate">
                                     <label for="level-intermediate">Intermediate</label>
                                 </div>
                             </li>
                             <li class="filter-option">
                                 <div class="filter-checkbox">
-                                    <input type="checkbox" id="level-advanced" name="level-advanced">
+                                    <input type="checkbox" id="level-advanced" name="levels" value="Advanced">
                                     <label for="level-advanced">Advanced</label>
                                 </div>
                             </li>
                         </ul>
-                </div>
+                    </div>
+
+                    <div class="filter-buttons">
+                        <button type="button" class="filter-button" onclick="applyFilters()">Apply Filters</button>
+                        <button type="button" class="clear-filter" onclick="clearFilters()">Clear All</button>
+                    </div>
+                </form>
             </div>
 
             <!-- Courses Column -->
             <div class="courses-section">
                 <div class="sort-options">
-                    <select class="sort-select">
+                    <select class="sort-select" id="sortSelect" onchange="sortCourses()">
                         <option value="most-popular">Most Popular</option>
                         <option value="highest-rated">Highest Rated</option>
                         <option value="newest">Newest</option>
                     </select>
-                    <!--<div class="results-count">Showing 1-12 of 156 courses</div>-->
+                    <div class="results-count" id="resultsCount">Showing <span id="coursesCount"
+                                                                               th:text="${#lists.size(courses)}">0</span>
+                        courses
+                    </div>
                 </div>
 
-                <div class="course-grid">
-                    <!-- Course Card 1 -->
+                <div class="course-grid" id="courseGrid">
+                    <!-- Course Cards -->
                     <a style="text-decoration: none"
                        class="course-card" th:each="course:${courses}"
-                       th:href="'login?next=%2Fuser%2Fcourses%2F'+${course.courseId}">
+                       th:href="@{/course/{id}(id=${course.courseId})}">
                         <div class="course-image">
                             <img th:src="${minioUrl} + '/'+ ${bucketName}+'/'+${course.courseImageFilePath}"
                                  th:alt="${course.title}">
@@ -641,32 +690,30 @@
                             <div class="course-category" th:text="${course.category}">Category</div>
                             <h3 class="course-title" th:text="${course.title}">Title</h3>
                             <p class="course-instructor" th:text="${course.instructor}">Instructor</p>
+
                             <div class="course-rating">
-                                <span class="rating-stars">★★★★★</span>
-                                <span class="rating-value">4.8</span>
-                                <span class="students-count" th:text="'('+${course.totalStudent}+')'">(0)</span>
+                                <span class="rating-stars">
+                                    <i th:each="i : ${#numbers.sequence(1, 5)}"
+                                       th:class="${course.rating >= i ? 'fa fa-star' :
+                                                  (course.rating >= i - 0.5 ? 'fa fa-star-half-o' : 'fa fa-star-o')}"></i>
+                                </span>
+                                <span class="rating-value"
+                                      th:text="${#numbers.formatDecimal(course.rating, 1, 1)}">4.5</span>
+                                <span class="students-count"
+                                      th:text="'(' + ${course.ratingStudentCount} + ' students)'"></span>
                             </div>
+
                             <div class="course-meta">
                                 <span th:text="${course.totalVideos} + ' video(s)'">0 videos</span>
-                                <span th:text="'Level'">Beginner Level</span>
+                                <span th:text="${course.level}">Beginner Level</span>
                             </div>
-                            <!--<div class="course-progress">
-                                <div class="progress-bar">
-                                    <div class="progress-filled" style="width: 60%;"></div>
-                                </div>
-                                <div class="progress-text">25/42 completed</div>
-                            </div>-->
                         </div>
                     </a>
                 </div>
 
-                <!-- Pagination -->
-                <!--<div class="pagination">
-                    <div class="page-item active"><a href="#" class="page-link">1</a></div>
-                    <div class="page-item"><a href="#" class="page-link">2</a></div>
-                    <div class="page-item"><a href="#" class="page-link">3</a></div>
-                    <div class="page-item"><a href="#" class="page-link">4</a></div>
-                    <div class="page-item"><a href="#" class="page-link">Next</a></div>
+                <!-- Will be added if pagination is needed -->
+                <!--<div class="pagination" id="pagination" th:if="${#lists.size(courses) > 12}">
+                    &lt;!&ndash; Pagination will be generated dynamically by JavaScript if needed &ndash;&gt;
                 </div>-->
             </div>
         </div>
@@ -680,35 +727,35 @@
             <div class="footer-col">
                 <h4>SkillSphere</h4>
                 <ul class="footer-links">
-                    <li><a href="#">About Us</a></li>
-                    <li><a href="#">Blog</a></li>
-                    <li><a href="#">Careers</a></li>
+                    <li><a href="/about">About Us</a></li>
+                    <li><a href="/blog">Blog</a></li>
+                    <li><a href="/careers">Careers</a></li>
                 </ul>
             </div>
 
             <div class="footer-col">
                 <h4>Learn</h4>
                 <ul class="footer-links">
-                    <li><a href="#">All Courses</a></li>
-                    <li><a href="#">Categories</a></li>
-                    <li><a href="#">Free Courses</a></li>
+                    <li><a href="/explore">All Courses</a></li>
+                    <li><a href="/categories">Categories</a></li>
+                    <li><a href="/free-courses">Free Courses</a></li>
                 </ul>
             </div>
 
             <div class="footer-col">
                 <h4>Teach</h4>
                 <ul class="footer-links">
-                    <li><a href="#">Become an Instructor</a></li>
-                    <li><a href="#">Instructor Guidelines</a></li>
+                    <li><a href="/teach">Become an Instructor</a></li>
+                    <li><a href="/instructor-guidelines">Instructor Guidelines</a></li>
                 </ul>
             </div>
 
             <div class="footer-col">
                 <h4>Support</h4>
                 <ul class="footer-links">
-                    <li><a href="#">Help Center</a></li>
-                    <li><a href="#">Contact Us</a></li>
-                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="/help">Help Center</a></li>
+                    <li><a href="/contact">Contact Us</a></li>
+                    <li><a href="/privacy">Privacy Policy</a></li>
                 </ul>
             </div>
         </div>
@@ -717,5 +764,149 @@
         </div>
     </div>
 </footer>
+
+<script>
+    // Course filtering and sorting functionality
+    document.addEventListener('DOMContentLoaded', function () {
+        // Store original courses for filtering
+        window.originalCourses = Array.from(document.querySelectorAll('.course-card'));
+    });
+
+    function applyFilters() {
+        // Get selected categories
+        const selectedCategories = Array.from(document.querySelectorAll('input[name="categories"]:checked'))
+            .map(checkbox => checkbox.nextElementSibling.textContent.trim());
+
+        // Get selected rating
+        const selectedRating = document.querySelector('input[name="rating"]:checked').value;
+
+        // Get selected levels
+        const selectedLevels = Array.from(document.querySelectorAll('input[name="levels"]:checked'))
+            .map(checkbox => checkbox.value);
+
+        // Filter the courses
+        const courses = window.originalCourses;
+        const filteredCourses = courses.filter(course => {
+            const courseCategory = course.querySelector('.course-category').textContent;
+            const courseRating = parseFloat(course.querySelector('.rating-value')?.textContent || '0');
+            const courseLevel = course.querySelector('.course-meta span:last-child').textContent;
+
+            // Filter by category (if any selected)
+            const categoryMatch = selectedCategories.length === 0 ||
+                selectedCategories.includes(courseCategory);
+
+            // Filter by rating
+            const ratingMatch = courseRating >= parseFloat(selectedRating);
+
+            // Filter by level (if any selected)
+            const levelMatch = selectedLevels.length === 0 ||
+                selectedLevels.includes(courseLevel);
+
+            return categoryMatch && ratingMatch && levelMatch;
+        });
+
+        // Update the course grid
+        const courseGrid = document.getElementById('courseGrid');
+        courseGrid.innerHTML = '';
+
+        if (filteredCourses.length === 0) {
+            courseGrid.innerHTML = '<p>No courses found matching your criteria. Try adjusting your filters.</p>';
+        } else {
+            filteredCourses.forEach(course => {
+                courseGrid.appendChild(course.cloneNode(true));
+            });
+        }
+
+        // Update the course count
+        document.getElementById('coursesCount').textContent = filteredCourses.length;
+
+        // Sort the filtered courses if a sort option is selected
+        sortCourses();
+    }
+
+    function clearFilters() {
+        // Reset all checkboxes and radio buttons
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.checked = false;
+        });
+
+        document.getElementById('rating-all').checked = true;
+
+        // Restore original courses
+        const courseGrid = document.getElementById('courseGrid');
+        courseGrid.innerHTML = '';
+
+        window.originalCourses.forEach(course => {
+            courseGrid.appendChild(course.cloneNode(true));
+        });
+
+        // Update the course count
+        document.getElementById('coursesCount').textContent = window.originalCourses.length;
+    }
+
+    function sortCourses() {
+        const sortBy = document.getElementById('sortSelect').value;
+        const courses = Array.from(document.querySelectorAll('#courseGrid .course-card'));
+
+        courses.sort((a, b) => {
+            if (sortBy === 'highest-rated') {
+                const ratingA = parseFloat(a.querySelector('.rating-value')?.textContent || '0');
+                const ratingB = parseFloat(b.querySelector('.rating-value')?.textContent || '0');
+                return ratingB - ratingA;
+            } else if (sortBy === 'most-popular') {
+                const studentsA = parseInt(a.querySelector('.students-count').textContent.match(/\d+/)[0] || '0');
+                const studentsB = parseInt(b.querySelector('.students-count').textContent.match(/\d+/)[0] || '0');
+                return studentsB - studentsA;
+            } else if (sortBy === 'newest') {
+                // If there's a date in the course data, you could sort by that
+                // For now, we'll just keep the original order for "newest"
+                return 0;
+            }
+        });
+
+        // Update the course grid with sorted courses
+        const courseGrid = document.getElementById('courseGrid');
+        courseGrid.innerHTML = '';
+
+        courses.forEach(course => {
+            courseGrid.appendChild(course);
+        });
+    }
+
+    function searchCourses() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+
+        if (!searchTerm) {
+            clearFilters();
+            return;
+        }
+
+        const courses = window.originalCourses;
+        const filteredCourses = courses.filter(course => {
+            const courseTitle = course.querySelector('.course-title').textContent.toLowerCase();
+            const courseInstructor = course.querySelector('.course-instructor').textContent.toLowerCase();
+            const courseCategory = course.querySelector('.course-category').textContent.toLowerCase();
+
+            return courseTitle.includes(searchTerm) ||
+                courseInstructor.includes(searchTerm) ||
+                courseCategory.includes(searchTerm);
+        });
+
+        // Update the course grid
+        const courseGrid = document.getElementById('courseGrid');
+        courseGrid.innerHTML = '';
+
+        if (filteredCourses.length === 0) {
+            courseGrid.innerHTML = '<p>No courses found matching your search. Try a different term.</p>';
+        } else {
+            filteredCourses.forEach(course => {
+                courseGrid.appendChild(course.cloneNode(true));
+            });
+        }
+
+        // Update the course count
+        document.getElementById('coursesCount').textContent = filteredCourses.length;
+    }
+</script>
 </body>
 </html>

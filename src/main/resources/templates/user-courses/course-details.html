@@ -125,6 +125,105 @@
         .video-icon {
             color: #5624d0;
         }
+
+        /* Rating styles */
+        .rating-container {
+            background-color: #f7f9fa;
+            border: 1px solid #d1d7dc;
+            border-radius: 4px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .rating-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .star-rating {
+            direction: rtl;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .star-rating input {
+            display: none;
+        }
+
+        .star-rating label {
+            color: #ddd;
+            font-size: 2rem;
+            padding: 0 3px;
+            cursor: pointer;
+            float: right;
+        }
+
+        .star-rating label:before {
+            content: "\f005";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+        }
+
+        .star-rating input:checked ~ label,
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: #ffc107;
+        }
+
+        .btn-submit-rating {
+            background-color: #a435f0;
+            color: white;
+            border: none;
+        }
+
+        .btn-submit-rating:hover {
+            background-color: #8710d8;
+            color: white;
+        }
+
+        .course-rating-display {
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .course-rating-stars {
+            color: #ffc107;
+            margin-right: 8px;
+        }
+
+        .course-rating-value {
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .course-rating-count {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .rating-success-message {
+            color: #20c997;
+            font-weight: bold;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .user-rating-display {
+            background-color: #e9ecef;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+
+        .rating-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
@@ -184,11 +283,28 @@
                     &nbsp;&nbsp;|&nbsp;&nbsp;
                     <span class="category-badge" th:text="${course.category}">Web Development</span>
                     &nbsp;&nbsp;|&nbsp;&nbsp;
+                    <span class="" th:text="${course.level}">Beginner</span>
+                    &nbsp;&nbsp;|&nbsp;&nbsp;
                     <span><i class="fas fa-users me-1"></i> <span th:text="${course.totalStudent}">12,345</span> student(s)</span>
                     &nbsp;&nbsp;|&nbsp;&nbsp;
                     <span><i class="far fa-calendar-alt me-1"></i> <span
                             th:text="${course.courseDate}">January 2025</span></span>
                 </p>
+
+                <!-- Course Rating Display - FIXED VERSION -->
+                <div class="course-rating-display">
+                    <div class="course-rating-stars">
+                        <span class="course-rating-stars">
+                                    <i th:each="i : ${#numbers.sequence(1, 5)}"
+                                       th:class="${course.rating >= i ? 'fa fa-star' :
+                                                  (course.rating >= i - 0.5 ? 'fa fa-star-half-o' : 'fa fa-star-o')}"></i>
+                                </span>
+                    </div>
+                    <span class="course-rating-value"
+                          th:text="${course.rating != null ? #numbers.formatDecimal(course.rating, 1, 1) : '0.0'}">4.5</span>
+                    <span class="course-rating-count"
+                          th:text="'(' + ${course.ratingStudentCount != null ? course.ratingStudentCount : '0'} + ' ratings)'"></span>
+                </div>
 
                 <div th:if="${isCompleted}" class="completed-badge">
                     <i class="fas fa-check-circle"></i> Course Completed
@@ -206,6 +322,58 @@
     <div class="row">
         <!-- Course Content -->
         <div class="col-lg-8">
+            <!-- Rating Section - Only visible for enrolled users -->
+            <div class="rating-container mb-4" th:if="${isEnrolled}">
+                <div class="rating-header">
+                    <h3 class="rating-title">Rate This Course</h3>
+                    <!-- FIXED USER RATING DISPLAY -->
+                    <div th:if="${userRating != null}" class="user-rating-display">
+                        <span>Your rating: </span>
+                        <span class="course-rating-stars">
+                                    <i th:each="i : ${#numbers.sequence(1, 5)}"
+                                       th:class="${userRating >= i ? 'fa fa-star' :
+                                                  (userRating >= i - 0.5 ? 'fa fa-star-half-o' : 'fa fa-star-o')}"></i>
+                                </span>
+                    </div>
+                </div>
+
+                <form th:action="@{/user/courses/{id}/rate(id=${course.courseId})}" method="post" id="ratingForm">
+                    <div class="star-rating">
+                        <input type="radio" id="star5" name="rating" value="5" th:checked="${userRating == 5}"/>
+                        <label for="star5" title="5 stars"></label>
+
+                        <input type="radio" id="star4" name="rating" value="4" th:checked="${userRating == 4}"/>
+                        <label for="star4" title="4 stars"></label>
+
+                        <input type="radio" id="star3" name="rating" value="3" th:checked="${userRating == 3}"/>
+                        <label for="star3" title="3 stars"></label>
+
+                        <input type="radio" id="star2" name="rating" value="2" th:checked="${userRating == 2}"/>
+                        <label for="star2" title="2 stars"></label>
+
+                        <input type="radio" id="star1" name="rating" value="1" th:checked="${userRating == 1}"/>
+                        <label for="star1" title="1 star"></label>
+                    </div>
+
+                    <div class="clearfix"></div>
+
+                    <button type="submit" class="btn btn-submit-rating">
+                        <span th:if="${userRating == null}">Submit Rating</span>
+                        <span th:unless="${userRating == null}">Update Rating</span>
+                    </button>
+
+                    <!-- FIXED: Display success message with inline style when flash attribute is present -->
+                    <div class="rating-success-message" th:if="${ratingSuccess}" style="display: block;">
+                        <i class="fas fa-check-circle"></i> Your rating has been submitted successfully!
+                    </div>
+                </form>
+
+                <!-- Debug output - Remove in production -->
+                <!--<div style="margin-top: 10px; color: #666; font-size: 0.8rem;">
+                    <p>Debug - User Rating: <span th:text="${userRating}">N/A</span></p>
+                </div>-->
+            </div>
+
             <h2>Course Content</h2>
             <p><span th:text="${course.sections.size()}">5</span> sections • <span
                     th:text="${#lists.size(course.sections.![videos])}">25</span> videos</p>
@@ -257,12 +425,16 @@
                     <h2 class="mb-4">Your Instructor</h2>
                     <div class="row">
                         <div class="col-md-2">
-                            <img th:src="${minioUrl}+'/'+${bucketName}+'/'+${instructorImage}" class="instructor-img" alt="Instructor">
+                            <img th:src="${minioUrl}+'/'+${bucketName}+'/'+${instructorImage}" class="instructor-img"
+                                 alt="Instructor">
                         </div>
                         <div class="col-md-10">
                             <h4 th:text="${course.instructor}">John Doe</h4>
-                            <p class="text-muted"><span th:text="${course.category}">Web Development</span> Instructor
+                            <p class="text-muted">
+                                <span th:text="${course.category}">Web Development</span>
+                                Instructor
                             </p>
+
                             <p>
                                 An experienced instructor passionate about teaching and helping students master new
                                 skills.
@@ -360,5 +532,18 @@
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    // JavaScript to show success message after rating submission
+    document.addEventListener('DOMContentLoaded', function () {
+        // Check if there's a success message element that's visible
+        const successMessage = document.querySelector('.rating-success-message');
+        if (successMessage && successMessage.style.display === 'block') {
+            // Hide the message after 3 seconds
+            setTimeout(function () {
+                successMessage.style.display = 'none';
+            }, 3000);
+        }
+    });
+</script>
 </body>
 </html>

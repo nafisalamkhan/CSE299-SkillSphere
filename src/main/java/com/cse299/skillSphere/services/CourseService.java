@@ -5,6 +5,8 @@ import com.cse299.skillSphere.dto.CourseRequest;
 import com.cse299.skillSphere.models.*;
 import com.cse299.skillSphere.repositories.*;
 import com.cse299.skillSphere.utils.AuthUtils;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,6 +30,7 @@ public class CourseService {
     private final EnrollmentRepository enrollmentRepository;
     private final AuthUtils authUtils;
     private final Mapper mapper;
+    private final CourseRatingRepository courseRatingRepository;
 
     @Transactional(rollbackFor = Exception.class)
     public Course createCourse(CourseRequest request) {
@@ -104,6 +107,7 @@ public class CourseService {
         course.setTitle(request.getTitle());
         course.setCourseDate(request.getCourseDate());
         course.setCategory(category);
+        course.setLevel(request.getLevel());
         course.setInstructor(instructor);
 
         if (request.getCourseImage() != null && !request.getCourseImage().isEmpty()) {
@@ -170,6 +174,7 @@ public class CourseService {
         courseRequest.setTitle(course.getTitle());
         courseRequest.setCourseDate(course.getCourseDate());
         courseRequest.setCategoryId(course.getCategory().getCategoryId());
+        courseRequest.setLevel(course.getLevel());
 
         // Add sections
         List<SectionRequest> sectionRequests = new ArrayList<>();
@@ -216,6 +221,7 @@ public class CourseService {
         // Update basic course info
         course.setTitle(courseRequest.getTitle());
         course.setCourseDate(courseRequest.getCourseDate());
+        course.setLevel(courseRequest.getLevel());
 
         // Update category if changed
         if (!Objects.equals(courseRequest.getCategoryId(), course.getCategory().getCategoryId())) {
@@ -389,4 +395,60 @@ public class CourseService {
                 .map(mapper::mapToCourseResponse)
                 .toList();
     }
+
+    public List<CourseResponse> getPopularCourses(int limit) {
+        return courseRepository.findPopularCourses(limit).stream().map(mapper::mapToCourseResponse).toList();
+    }
+
+    public List<CourseResponse> filterCourses(List<Integer> categories, Double minRating, List<String> levels, String sortBy) {
+        return courseRepository
+                .findForExploreCourses(categories, minRating, levels, sortBy).stream()
+                .map(mapper::mapToCourseResponse).toList();
+    }
+
+    public Integer getUserRating(Integer courseId) {
+        User user = authUtils.getLoggedInUser();
+        final Integer value = courseRatingRepository.findRatingByUser(courseId, user.getId());
+        return value != null ? value : 0;
+    }
+
+
+    @Transactional
+    public CourseRating saveOrUpdateRating(Integer courseId, Integer rating) {
+        Long userId = authUtils.getLoggedInUser().getId();
+        // Validate rating value
+        if (rating < 1 || rating > 5) {
+            throw new IllegalArgumentException("Rating must be between 1 and 5");
+        }
+
+        // Find existing rating if exists
+        CourseRating existingRating = courseRatingRepository
+                .findByCourseCourseIdAndStudentId(courseId, userId)
+                .orElse(null);
+
+        if (existingRating != null) {
+            // Update existing rating
+            existingRating.setRating(rating);
+            return courseRatingRepository.save(existingRating);
+        } else {
+            // Create new rating
+            Course course = courseRepository.findById(courseId)
+                    .orElseThrow(() -> new EntityNotFoundException("Course not found"));
+
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+            CourseRating newRating = CourseRating.builder()
+                    .course(course)
+                    .student(user)
+                    .rating(rating)
+                    .build();
+
+            CourseRating savedRating = courseRatingRepository.save(newRating);
+
+            return savedRating;
+        }
+    }
+
+
 }
