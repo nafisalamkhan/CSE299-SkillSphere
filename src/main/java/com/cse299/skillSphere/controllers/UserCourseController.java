@@ -253,6 +253,8 @@ public class UserCourseController {
 
 
 
+
+/*
     //chatbot
     @GetMapping("/chatbot")
     public String chatbotPage() {
@@ -263,6 +265,6 @@ public class UserCourseController {
     public String chatbotStreamPage(Model model) {
         return "stream";
     }
-
+*/
 
 }
