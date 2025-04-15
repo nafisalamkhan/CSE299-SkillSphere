@@ -249,4 +249,22 @@ public class UserCourseController {
         return "redirect:/user/courses/" + courseId;
     }
 
+
+
+
+
+
+/*
+    //chatbot
+    @GetMapping("/chatbot")
+    public String chatbotPage() {
+        return "chatbot";
+    }
+
+    @GetMapping("/chatbot-stream")
+    public String chatbotStreamPage(Model model) {
+        return "stream";
+    }
+*/
+
 }

@@ -224,6 +224,37 @@
             align-items: center;
             margin-bottom: 15px;
         }
+
+
+
+
+
+        .chat-icon-btn {
+        background-color: #4e73df;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        margin-top: 10px;
+    }
+
+    .chat-icon-btn:hover {
+        background-color: #3a5bc7;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .chat-icon-btn i {
+        font-size: 16px;
+    }
     </style>
 </head>
 <body>
@@ -439,6 +470,12 @@
                                 An experienced instructor passionate about teaching and helping students master new
                                 skills.
                             </p>
+
+                            <!-- Chat Icon Button -->
+                            <button class="chat-icon-btn" id="instructorChatBtn">
+                                <i class="fas fa-comment-dots"></i> Chat with Instructor
+                            </button>
+
                         </div>
                     </div>
                 </div>
@@ -543,6 +580,15 @@
                 successMessage.style.display = 'none';
             }, 3000);
         }
+    });
+
+
+
+    document.getElementById('instructorChatBtn').addEventListener('click', function() {
+        // Replace this with your chat opening logic
+        console.log('Chat with instructor clicked');
+        // If you have a chat modal or similar, trigger it here
+        // Example: $('#chatModal').modal('show');
     });
 </script>
 </body>

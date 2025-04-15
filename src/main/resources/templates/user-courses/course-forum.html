@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Course Forum</title>
+    <!-- Include your CSS/JS dependencies -->
+</head>
+<body>
+<!-- Reuse your navbar from courses.html -->
+<nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2>
+                <a th:href="@{/user/courses/{id}(id=${course.courseId})}"
+                   class="text-decoration-none">
+                    <i class="fas fa-arrow-left me-2"></i>
+                </a>
+                Discussion Forum: <span th:text="${course.title}"></span>
+            </h2>
+
+            <!-- Your forum content goes here -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <!-- Implement your forum UI here -->
+                    <div id="forum-messages"></div>
+                    <form id="forum-form" class="mt-3">
+                        <div class="input-group">
+                            <input type="text" class="form-control"
+                                   placeholder="Post a message...">
+                            <button class="btn btn-primary" type="submit">Post</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reuse your footer from courses.html -->
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>
