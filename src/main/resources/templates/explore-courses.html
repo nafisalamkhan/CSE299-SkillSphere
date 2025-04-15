@@ -775,7 +775,7 @@
     function applyFilters() {
         // Get selected categories
         const selectedCategories = Array.from(document.querySelectorAll('input[name="categories"]:checked'))
-            .map(checkbox => checkbox.nextElementSibling.textContent.trim());
+            .map(checkbox => checkbox.nextElementSibling.textContent.toLowerCase().trim());
 
         // Get selected rating
         const selectedRating = document.querySelector('input[name="rating"]:checked').value;
@@ -787,7 +787,7 @@
         // Filter the courses
         const courses = window.originalCourses;
         const filteredCourses = courses.filter(course => {
-            const courseCategory = course.querySelector('.course-category').textContent;
+            const courseCategory = course.querySelector('.course-category').textContent.toLowerCase();
             const courseRating = parseFloat(course.querySelector('.rating-value')?.textContent || '0');
             const courseLevel = course.querySelector('.course-meta span:last-child').textContent;
 
